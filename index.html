@@ -1,11 +1,691 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Mon portfolio</title>
-    <meta charset="UTF-8">
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faneva RAVELONOMENJANAHARY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --color-bg: #ffffff;
+        --color-surface: #f8f8f8;
+        --color-border: #e4e4e4;
+        --color-text: #111111;
+        --color-text-muted: #666666;
+        --color-accent: #0055ff;
+        --font: 'Inter', system-ui, -apple-system, sans-serif;
+        --radius: 8px;
+        --shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+        --max-width: 820px;
+        --section-gap: 80px;
+      }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        font-family: var(--font);
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+        font-size: 16px;
+      }
+
+      /* ── Nav ── */
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .nav-inner {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .nav-logo {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--color-text);
+        text-decoration: none;
+        letter-spacing: -0.01em;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 32px;
+        list-style: none;
+      }
+
+      .nav-links a {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .nav-links a:hover { color: var(--color-text); }
+
+      .nav-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 20px;
+        color: var(--color-text);
+      }
+
+      /* ── Hero ── */
+      #hero {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 96px 24px 80px;
+      }
+
+      .hero-tag {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-accent);
+        margin-bottom: 20px;
+      }
+
+      .hero-name {
+        font-size: clamp(36px, 6vw, 58px);
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        color: var(--color-text);
+        margin-bottom: 20px;
+      }
+
+      .hero-bio {
+        font-size: 17px;
+        color: var(--color-text-muted);
+        max-width: 520px;
+        line-height: 1.65;
+        margin-bottom: 36px;
+      }
+
+      .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: var(--color-text);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: var(--radius);
+        transition: background 0.2s;
+      }
+
+      .hero-cta:hover { background: #333; }
+
+      /* ── Sections ── */
+      section {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: var(--section-gap) 24px;
+        border-top: 1px solid var(--color-border);
+      }
+
+      .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        margin-bottom: 8px;
+      }
+
+      .section-title {
+        font-size: clamp(22px, 4vw, 30px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--color-text);
+        margin-bottom: 40px;
+      }
+
+      /* ── About ── */
+      .about-text {
+        font-size: 16px;
+        color: var(--color-text-muted);
+        line-height: 1.75;
+        max-width: 620px;
+      }
+
+      .about-text p + p { margin-top: 16px; }
+
+      .about-meta {
+        margin-top: 32px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+      }
+
+      .about-meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .about-meta-item .meta-key {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+      }
+
+      .about-meta-item .meta-val {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--color-text);
+      }
+
+      /* ── Projects ── */
+      .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+      }
+
+      .project-card {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        padding: 28px;
+        background: var(--color-bg);
+        box-shadow: var(--shadow);
+        transition: box-shadow 0.2s, transform 0.2s;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .project-card:hover {
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.09);
+        transform: translateY(-2px);
+      }
+
+      .project-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .project-icon {
+        font-size: 18px;
+        color: var(--color-text-muted);
+      }
+
+      .project-links {
+        display: flex;
+        gap: 12px;
+      }
+
+      .project-links a {
+        font-size: 15px;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .project-links a:hover { color: var(--color-text); }
+
+      .project-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-text);
+        letter-spacing: -0.01em;
+      }
+
+      .project-desc {
+        font-size: 14px;
+        color: var(--color-text-muted);
+        line-height: 1.65;
+      }
+
+      .project-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+      }
+
+      .tag {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        padding: 3px 10px;
+        border-radius: 100px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-muted);
+      }
+
+      /* ── Skills ── */
+      .skills-groups {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      .skills-group-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        margin-bottom: 12px;
+      }
+
+      .skills-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .skill-tag {
+        font-size: 13px;
+        font-weight: 500;
+        padding: 6px 14px;
+        border-radius: var(--radius);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text);
+        transition: border-color 0.2s, background 0.2s;
+        cursor: default;
+      }
+
+      .skill-tag:hover {
+        border-color: #aaa;
+        background: #f0f0f0;
+      }
+
+      /* ── Contact ── */
+      .contact-intro {
+        font-size: 16px;
+        color: var(--color-text-muted);
+        margin-bottom: 36px;
+        max-width: 480px;
+        line-height: 1.65;
+      }
+
+      .contact-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+      }
+
+      .contact-link {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--color-text);
+        text-decoration: none;
+        padding: 14px 18px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        background: var(--color-bg);
+        box-shadow: var(--shadow);
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      .contact-link:hover {
+        border-color: #999;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      }
+
+      .contact-link i {
+        font-size: 16px;
+        width: 18px;
+        text-align: center;
+        color: var(--color-text-muted);
+        flex-shrink: 0;
+      }
+
+      .contact-link span { flex: 1; }
+
+      .contact-link .arrow {
+        font-size: 11px;
+        color: var(--color-text-muted);
+        flex-shrink: 0;
+      }
+
+      .contact-plain {
+        cursor: default;
+      }
+
+      /* ── Footer ── */
+      footer {
+        border-top: 1px solid var(--color-border);
+        padding: 28px 24px;
+        margin-top: 40px;
+      }
+
+      .footer-inner {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .footer-copy {
+        font-size: 13px;
+        color: var(--color-text-muted);
+      }
+
+      .footer-socials {
+        display: flex;
+        gap: 18px;
+      }
+
+      .footer-socials a {
+        font-size: 16px;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .footer-socials a:hover { color: var(--color-text); }
+
+      /* ── Responsive ── */
+      @media (max-width: 600px) {
+        .nav-links {
+          display: none;
+          flex-direction: column;
+          position: absolute;
+          top: 60px;
+          left: 0;
+          right: 0;
+          background: #fff;
+          border-bottom: 1px solid var(--color-border);
+          padding: 16px 24px;
+          gap: 16px;
+        }
+
+        .nav-links.open { display: flex; }
+        .nav-toggle { display: block; }
+
+        .projects-grid { grid-template-columns: 1fr; }
+
+        .contact-list { max-width: 100%; }
+      }
+    </style>
+    <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
 </head>
-<body>
-    <h1>Bienvenue sur mon site</h1>
-    <p>Mon portfolio est en construction.</p>
-</body>
+  <body>
+
+    <nav>
+      <div class="nav-inner">
+        <a href="#hero" class="nav-logo">Faneva R.</a>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#about">À propos</a></li>
+          <li><a href="#projects">Projets</a></li>
+          <li><a href="#skills">Compétences</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+
+    <div id="hero">
+      <span class="hero-tag">Étudiant </span>
+      <h1 class="hero-name">Bonjour, je suis<br>Faneva R.</h1>
+      <p class="hero-bio">
+        Passionné par les systèmes distribués, l'apprentissage automatique et la recherche appliquée.
+        Je construis des solutions logicielles rigoureuses et travaille à la frontière entre théorie et pratique.
+      </p>
+      <a href="#contact" class="hero-cta">
+        Me contacter <i class="fa-solid fa-arrow-right fa-sm"></i>
+      </a>
+    </div>
+
+    <section id="about">
+      <p class="section-label">Bio</p>
+      <h2 class="section-title">À propos</h2>
+      <div class="about-text">
+        <p>
+          Je suis étudiant en Licence en IA/Robotique/DataScience à Orion University, spécialisé dans les systèmes
+          intelligents et le traitement du langage naturel. Mes travaux de recherche portent sur l'efficacité
+          des modèles de deep learning dans des environnements à ressources limitées.
+        </p>
+        <p>
+          En parallèle, je suis aussi étudiant en Licence en Science physique à l'Université d'Antananarivo, ce qui me permet de bien relier deux domaines compatibles. Je suis particulièrement intéressé par les questions d'interprétabilité des modèles
+          et d'éthique en IA.
+        </p>
+      </div>
+      <div class="about-meta">
+        <div class="about-meta-item">
+          <span class="meta-key">Formation</span>
+          <span class="meta-val">Licence IRD — Orion University</span>
+        </div>
+        <div class="about-meta-item">
+          <span class="meta-key">Domaine</span>
+          <span class="meta-val">IA · Data Sciences · Robotique</span>
+        </div>
+        <div class="about-meta-item">
+          <span class="meta-key">Localisation</span>
+          <span class="meta-val">Ikianja, Ambohimangakely</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <p class="section-label">Travaux</p>
+      <h2 class="section-title">Projets</h2>
+      <div class="projects-grid">
+
+        <div class="project-card">
+          <div class="project-card-top">
+            <i class="fa-solid fa-brain project-icon"></i>
+            <div class="project-links">
+              <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
+              <a href="#" title="Voir le projet"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            </div>
+          </div>
+          <div class="project-name">LLM-Compress</div>
+          <div class="project-desc">
+            Exploration de techniques de quantification et d'élagage pour réduire l'empreinte mémoire
+            des grands modèles de langage sans perte significative de performance.
+          </div>
+          <div class="project-tags">
+            <span class="tag">Python</span>
+            <span class="tag">PyTorch</span>
+            <span class="tag">NLP</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-card-top">
+            <i class="fa-solid fa-network-wired project-icon"></i>
+            <div class="project-links">
+              <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
+            </div>
+          </div>
+          <div class="project-name">DistCache</div>
+          <div class="project-desc">
+            Implémentation d'un système de cache distribué cohérent basé sur le protocole Raft,
+            avec gestion des pannes et réplication automatique des données.
+          </div>
+          <div class="project-tags">
+            <span class="tag">Go</span>
+            <span class="tag">Raft</span>
+            <span class="tag">Systèmes Distribués</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-card-top">
+            <i class="fa-solid fa-diagram-project project-icon"></i>
+            <div class="project-links">
+              <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
+              <a href="#" title="Article"><i class="fa-solid fa-file-lines"></i></a>
+            </div>
+          </div>
+          <div class="project-name">GraphSight</div>
+          <div class="project-desc">
+            Outil de visualisation interactive de graphes de connaissances, permettant l'exploration
+            de relations sémantiques entre entités issues de corpus scientifiques.
+          </div>
+          <div class="project-tags">
+            <span class="tag">JavaScript</span>
+            <span class="tag">D3.js</span>
+            <span class="tag">Graph ML</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-card-top">
+            <i class="fa-solid fa-shield-halved project-icon"></i>
+            <div class="project-links">
+              <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
+            </div>
+          </div>
+          <div class="project-name">SecurePrompt</div>
+          <div class="project-desc">
+            Étude et démonstration des vulnérabilités de prompt injection dans les LLMs, avec
+            un benchmark de mécanismes de défense comparés sur différents modèles open source.
+          </div>
+          <div class="project-tags">
+            <span class="tag">Python</span>
+            <span class="tag">Sécurité IA</span>
+            <span class="tag">LLM</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="skills">
+      <p class="section-label">Savoir-faire</p>
+      <h2 class="section-title">Compétences</h2>
+      <div class="skills-groups">
+
+        <div>
+          <div class="skills-group-label">Langages</div>
+          <div class="skills-tags">
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">JavaScript</span>
+            <span class="skill-tag">Go</span>
+            <span class="skill-tag">C / C++</span>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">Bash</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="skills-group-label">Frameworks & Outils</div>
+          <div class="skills-tags">
+            <span class="skill-tag">PyTorch</span>
+            <span class="skill-tag">Hugging Face</span>
+            <span class="skill-tag">scikit-learn</span>
+            <span class="skill-tag">Docker</span>
+            <span class="skill-tag">Git</span>
+            <span class="skill-tag">Linux</span>
+            <span class="skill-tag">LaTeX</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="skills-group-label">Domaines de recherche</div>
+          <div class="skills-tags">
+            <span class="skill-tag">Apprentissage automatique</span>
+            <span class="skill-tag">Traitement du langage naturel</span>
+            <span class="skill-tag">Systèmes distribués</span>
+            <span class="skill-tag">Sécurité IA</span>
+            <span class="skill-tag">Optimisation</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="contact">
+      <p class="section-label">Me joindre</p>
+      <h2 class="section-title">Contact</h2>
+      <p class="contact-intro">
+        Vous avez un projet, une opportunité de collaboration ou simplement une question ?
+        N'hésitez pas à me contacter via les canaux ci-dessous.
+      </p>
+      <div class="contact-list">
+        <a href="https://linkedin.com/in/votre-profil" target="_blank" rel="noopener" class="contact-link">
+          <i class="fa-brands fa-linkedin"></i>
+          <span>https://www.linkedin.com/in/fanevaravelonomenjanahary/</span>
+          <i class="fa-solid fa-arrow-up-right-from-square arrow"></i>
+        </a>
+        <a href="https://github.com/votre-pseudo" target="_blank" rel="noopener" class="contact-link">
+          <i class="fa-brands fa-github"></i>
+          <span>github.com/faneva619</span>
+          <i class="fa-solid fa-arrow-up-right-from-square arrow"></i>
+        </a>
+        <div class="contact-link contact-plain">
+          <i class="fa-solid fa-envelope"></i>
+          <span>fanevaravelonomenjanahary@gmail.com</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-inner">
+        <span class="footer-copy">© <span id="year"></span> Faneva R. Tous droits réservés.</span>
+        <div class="footer-socials">
+          <a href="https://github.com/votre-pseudo" target="_blank" rel="noopener" aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a href="https://linkedin.com/in/votre-profil" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      const toggle = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+
+      toggle.addEventListener('click', () => {
+        navLinks.classList.toggle('open');
+      });
+
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => navLinks.classList.remove('open'));
+      });
+    </script>
+
+  </body>
 </html>
