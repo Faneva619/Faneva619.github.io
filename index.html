@@ -53,6 +53,17 @@
         transition: background-color 0.3s, color 0.3s;
       }
 
+      /* Style du canvas pour le réseau de neurones arrière-plan */
+      #network-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        pointer-events: none; /* Laisse passer les clics vers le reste du site */
+      }
+
       /* ── Nav ── */
       nav {
         position: sticky;
@@ -312,7 +323,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: auto; /* Aligne les tags en bas si les descriptions diffèrent en hauteur */
+        margin-top: auto;
         padding-top: 8px;
       }
 
@@ -495,6 +506,8 @@
   </head>
   <body>
 
+    <canvas id="network-canvas"></canvas>
+
     <nav>
       <div class="nav-inner">
         <a href="#hero" class="nav-logo">Faneva R.</a>
@@ -505,7 +518,6 @@
             <li><a href="#skills">Compétences</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
-          <!-- Bouton bascule de thème -->
           <button class="theme-toggle" id="theme-toggle" aria-label="Changer de thème">
             <i class="fa-solid fa-moon"></i>
           </button>
@@ -758,7 +770,6 @@
       const themeToggle = document.getElementById('theme-toggle');
       const icon = themeToggle.querySelector('i');
       
-      // Vérification des préférences utilisateur enregistrées ou du système
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       
@@ -782,6 +793,128 @@
           icon.className = 'fa-solid fa-sun';
         }
       });
+
+      // ── SIMULATION DU RÉSEAU DE NEURONES (CANVAS) ──
+      const canvas = document.getElementById('network-canvas');
+      const ctx = canvas.getContext('2d');
+
+      let nodes = [];
+      const numNodes = 75; // Ajustable selon la densité souhaitée
+      const maxDistance = 120; 
+      let mouse = { x: null, y: null };
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      window.addEventListener('mouseout', () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
+
+      class Node {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.vx = (Math.random() - 0.5) * 0.6;
+          this.vy = (Math.random() - 0.5) * 0.6;
+          this.radius = Math.random() * 2 + 1;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+          // Légère attraction vers le curseur
+          if (mouse.x !== null && mouse.y !== null) {
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 180) {
+              this.x += (dx / dist) * 0.2;
+              this.y += (dy / dist) * 0.2;
+            }
+          }
+        }
+
+        draw(color) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+        }
+      }
+
+      // Initialisation des nœuds
+      for (let i = 0; i < numNodes; i++) {
+        nodes.push(new Node());
+      }
+
+      // Boucle d'animation principale
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Lecture dynamique du thème injecté par ton script principal
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const nodeColor = isDark ? 'rgba(88, 166, 255, 0.45)' : 'rgba(0, 85, 255, 0.35)';
+        const lineColor = isDark ? 'rgba(48, 54, 61, ' : 'rgba(228, 228, 228, ';
+
+        nodes.forEach(node => {
+          node.update();
+          node.draw(nodeColor);
+        });
+
+        // Calcul des synapses entre nœuds
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            let dx = nodes[i].x - nodes[j].x;
+            let dy = nodes[i].y - nodes[j].y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < maxDistance) {
+              let alpha = (1 - dist / maxDistance) * 0.4;
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.strokeStyle = lineColor + alpha + ')';
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+
+          // Connexion interactive au curseur
+          if (mouse.x !== null && mouse.y !== null) {
+            let dx = nodes[i].x - mouse.x;
+            let dy = nodes[i].y - mouse.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 150) {
+              let alpha = (1 - dist / 150) * 0.5;
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(mouse.x, mouse.y);
+              // Éclairage de la synapse active vers le curseur
+              ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
+              ctx.lineWidth = 0.9;
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
     </script>
 
   </body>
