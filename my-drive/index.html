@@ -276,6 +276,30 @@
         transition: opacity 0.2s;
       }
       .send-btn:hover { opacity: 0.9; }
+        /* RESPONSIVE DESIGN (MOBILE & TABLETTE) */
+      @media (max-width: 768px) {
+        .main-container {
+          flex-direction: column; /* Aligne verticalement sur mobile */
+          height: auto;
+          overflow-y: auto;
+        }
+
+        .drive-section {
+          flex: none;
+          border-right: none;
+          border-bottom: 1px solid var(--color-border); /* Séparateur horizontal */
+          padding: 16px;
+        }
+
+        .chat-section {
+          flex: none;
+          height: 600px; /* Donne une hauteur fixe à la zone de chat pour pouvoir défiler dedans */
+        }
+
+        .grid-folders {
+          grid-template-columns: repeat(2, 1fr); /* 2 colonnes propres sur mobile */
+        }
+      }
     </style>
 </head>
 <body>
