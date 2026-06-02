@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 — Signal Perdu</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --color-bg: #ffffff;
+        --color-surface: #f8f8f8;
+        --color-border: #e4e4e4;
+        --color-text: #111111;
+        --color-text-muted: #666666;
+        --color-accent: #0055ff;
+        --font: 'Inter', system-ui, -apple-system, sans-serif;
+        --radius: 8px;
+        --shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+        --max-width: 820px;
+      }
+
+      [data-theme="dark"] {
+        --color-bg: #0d1117;
+        --color-surface: #161b22;
+        --color-border: #30363d;
+        --color-text: #c9d1d9;
+        --color-text-muted: #8b949e;
+        --color-accent: #58a6ff;
+        --shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      body {
+        font-family: var(--font);
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      #network-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+        cursor: crosshair;
+      }
+
+      /* Conteneur de l'erreur superposé au jeu */
+      .error-container {
+        position: relative;
+        z-index: 10;
+        max-width: 500px;
+        padding: 40px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        text-align: center;
+        pointer-events: auto;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background: rgba(var(--color-surface), 0.85);
+      }
+
+      h1 {
+        font-size: 5rem;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--color-text);
+        margin-bottom: 10px;
+      }
+
+      p {
+        font-size: 15px;
+        color: var(--color-text-muted);
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      .game-status {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-accent);
+        margin-bottom: 24px;
+        min-height: 18px;
+      }
+
+      .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: var(--color-text);
+        color: var(--color-bg);
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: var(--radius);
+        transition: background 0.2s, opacity 0.2s;
+        border: none;
+        cursor: pointer;
+      }
+
+      .hero-cta:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <canvas id="network-canvas"></canvas>
+
+    <div class="error-container">
+        <h1>404</h1>
+        <p>Erreur de routage. Ce segment du réseau est introuvable ou a été désactivé.</p>
+        <div class="game-status" id="game-status">Cliquez pour stabiliser le réseau (0/5)</div>
+        <a href="https://faneva619.github.io/" class="hero-cta">
+            Revenir au Hub <i class="fa-solid fa-arrow-right fa-sm"></i>
+        </a>
+    </div>
+
+    <script>
+      // 1. Alignement strict du thème sauvegardé sur l'index
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+
+      // 2. Configuration du Canvas intégrant la mécanique de jeu
+      const canvas = document.getElementById('network-canvas');
+      const ctx = canvas.getContext('2d');
+      const statusText = document.getElementById('game-status');
+
+      let nodes = [];
+      const numNodes = 85; 
+      const maxDistance = 125; 
+      let mouse = { x: null, y: null };
+      let shockwaves = []; // Stockage des ondes de clic
+      let clickCount = 0;
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      // L'interaction devient mécanique de jeu : Ondes de choc synaptiques au clic
+      window.addEventListener('click', (e) => {
+        // Crée une perturbation à l'épicentre du clic
+        shockwaves.push({
+          x: e.clientX,
+          y: e.clientY,
+          currentRadius: 0,
+          maxRadius: 150,
+          force: 8
+        });
+
+        clickCount++;
+        if (clickCount < 5) {
+          statusText.textContent = `Impulsions synaptiques : ${clickCount}/5`;
+        } else if (clickCount === 5) {
+          statusText.textContent = "Réseau stabilisé ! Le Hub est accessible.";
+          statusText.style.color = "#2ea44f"; // Vert de validation classique
+        } else {
+          statusText.textContent = `Impulsions de surcharge : ${clickCount}`;
+        }
+      });
+
+      class Node {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.vx = (Math.random() - 0.5) * 0.7;
+          this.vy = (Math.random() - 0.5) * 0.7;
+          this.radius = Math.random() * 2 + 1;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+          // Attraction naturelle vers le pointeur
+          if (mouse.x !== null && mouse.y !== null) {
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 180) {
+              this.x += (dx / dist) * 0.22;
+              this.y += (dy / dist) * 0.22;
+            }
+          }
+
+          // Force de l'onde de choc (Répulsion dynamique)
+          shockwaves.forEach(wave => {
+            let dx = this.x - wave.x;
+            let dy = this.y - wave.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Si le neurone est touché par le front de l'onde
+            if (dist < wave.currentRadius + 15 && dist > wave.currentRadius - 15) {
+              let force = (1 - dist / wave.maxRadius) * wave.force;
+              if (force > 0) {
+                this.x += (dx / dist) * force;
+                this.y += (dy / dist) * force;
+              }
+            }
+          });
+        }
+
+        draw(color) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < numNodes; i++) {
+        nodes.push(new Node());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const nodeColor = isDark ? 'rgba(88, 166, 255, 0.45)' : 'rgba(0, 85, 255, 0.35)';
+        const lineColor = isDark ? 'rgba(48, 54, 61, ' : 'rgba(228, 228, 228, ';
+
+        // Mise à jour et propagation des ondes de choc
+        shockwaves.forEach((wave, index) => {
+          wave.currentRadius += 4;
+          
+          // Dessin du front de l'onde synaptique
+          ctx.beginPath();
+          ctx.arc(wave.x, wave.y, wave.currentRadius, 0, Math.PI * 2);
+          let alpha = (1 - wave.currentRadius / wave.maxRadius) * 0.25;
+          ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          if (wave.currentRadius > wave.maxRadius) {
+            shockwaves.splice(index, 1);
+          }
+        });
+
+        nodes.forEach(node => {
+          node.update();
+          node.draw(nodeColor);
+        });
+
+        // Construction du maillage structurel (Synapses)
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            let dx = nodes[i].x - nodes[j].x;
+            let dy = nodes[i].y - nodes[j].y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < maxDistance) {
+              let alpha = (1 - dist / maxDistance) * 0.4;
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.strokeStyle = lineColor + alpha + ')';
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+
+          // Connexions directes au curseur
+          if (mouse.x !== null && mouse.y !== null) {
+            let dx = nodes[i].x - mouse.x;
+            let dy = nodes[i].y - mouse.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 150) {
+              let alpha = (1 - dist / 150) * 0.5;
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(mouse.x, mouse.y);
+              ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
+              ctx.lineWidth = 0.9;
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    </script>
+</body>
+</html>
