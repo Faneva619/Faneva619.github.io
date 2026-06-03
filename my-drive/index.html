@@ -276,28 +276,51 @@
         transition: opacity 0.2s;
       }
       .send-btn:hover { opacity: 0.9; }
-      /* RESPONSIVE DESIGN (MOBILE & TABLETTE) */
+      /* RESPONSIVE DESIGN (MOBILE & TABLETTE) - VERSION FIXE SANS OVERFLOW EXTERNE */
       @media (max-width: 768px) {
+        body {
+          height: 100vh;
+          overflow: hidden; /* Empêche la page entière de scroller */
+        }
+
         .main-container {
-          flex-direction: column; /* Aligne verticalement sur mobile */
-          height: auto;
-          overflow-y: auto;
+          flex-direction: column; 
+          height: calc(100vh - 58px); /* Prend exactement la hauteur restante sous la navbar */
+          overflow: hidden;
         }
 
         .drive-section {
           flex: none;
+          max-height: 35vh; /* Bloque l'explorateur à 35% de l'écran max */
           border-right: none;
-          border-bottom: 1px solid var(--color-border); /* Séparateur horizontal */
-          padding: 16px;
+          border-bottom: 1px solid var(--color-border);
+          padding: 12px;
+          overflow-y: auto; /* Permet de scroller dans les dossiers si besoin */
         }
 
         .chat-section {
-          flex: none;
-          height: 600px; /* Donne une hauteur fixe à la zone de chat pour pouvoir défiler dedans */
+          flex: 1; /* Le chat prend TOUT l'espace restant disponible */
+          display: flex;
+          flex-direction: column;
+          height: auto; /* Supprime les 600px fixes qui cassaient tout */
+          overflow: hidden;
+        }
+
+        .chat-messages {
+          flex: 1;
+          overflow-y: auto; /* Permet aux messages de défiler de manière isolée */
+          padding: 16px;
+        }
+
+        .chat-input-area {
+          padding: 12px 16px;
+          background: var(--color-bg);
+          position: sticky;
+          bottom: 0; /* Verrouille l'input au ras de l'écran, juste au-dessus du clavier */
         }
 
         .grid-folders {
-          grid-template-columns: repeat(2, 1fr); /* 2 colonnes propres sur mobile */
+          grid-template-columns: repeat(2, 1fr);
         }
       }
     </style>
