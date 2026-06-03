@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Drive — IA Nexus</title>
+    <!-- CSP : bloque les scripts inline non autorisés et les ressources externes non listées -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; 
+                   script-src 'self' 'unsafe-inline'; 
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; 
+                   font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
+                   connect-src https://fanevarivotiana-neural-drive-backend.hf.space; 
+                   img-src 'self' data:;" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="no-referrer" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>NeuralDrive — IA Nexus</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -25,6 +36,7 @@
         --color-text-muted: #666666;
         --color-accent: #0055ff;
         --color-accent-light: rgba(0, 85, 255, 0.1);
+        --color-danger: #ff3b3b;
         --font: 'Inter', system-ui, -apple-system, sans-serif;
         --radius: 8px;
         --shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
@@ -52,7 +64,6 @@
         transition: background-color 0.3s, color 0.3s;
       }
 
-      /* Navbar */
       header {
         display: flex;
         justify-content: space-between;
@@ -72,14 +83,12 @@
 
       .logo i { color: var(--color-accent); }
 
-      /* Layout Principal */
       .main-container {
         display: flex;
         flex: 1;
         height: calc(100vh - 58px);
       }
 
-      /* Section Gauche : Drive */
       .drive-section {
         flex: 1.2;
         border-right: 1px solid var(--color-border);
@@ -90,7 +99,6 @@
         overflow-y: auto;
       }
 
-      /* Section Droite : Chat IA */
       .chat-section {
         flex: 1.5;
         display: flex;
@@ -107,7 +115,6 @@
         margin-bottom: 12px;
       }
 
-      /* Zone de Drop de fichiers */
       .upload-zone {
         border: 2px dashed var(--color-border);
         border-radius: var(--radius);
@@ -117,7 +124,7 @@
         transition: border-color 0.2s, background 0.2s;
       }
 
-      .upload-zone:hover {
+      .upload-zone:hover, .upload-zone.drag-over {
         border-color: var(--color-accent);
         background: var(--color-accent-light);
       }
@@ -128,7 +135,6 @@
         margin-bottom: 12px;
       }
 
-      /* Dossiers et Fichiers */
       .grid-folders {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -168,6 +174,7 @@
 
       .file-info { display: flex; align-items: center; gap: 10px; }
       .file-info i { color: var(--color-accent); }
+
       .status-badge {
         font-size: 11px;
         padding: 2px 8px;
@@ -177,7 +184,25 @@
         font-weight: 600;
       }
 
-      /* Interface de Chat */
+      /* Upload progress bar */
+      .progress-bar-wrap {
+        height: 4px;
+        background: var(--color-border);
+        border-radius: 2px;
+        margin-top: 8px;
+        overflow: hidden;
+        display: none;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--color-accent);
+        border-radius: 2px;
+        transition: width 0.3s ease;
+      }
+
+      /* Chat */
       .chat-header {
         padding: 16px 24px;
         border-bottom: 1px solid var(--color-border);
@@ -203,6 +228,7 @@
         border-radius: var(--radius);
         font-size: 14px;
         line-height: 1.5;
+        word-break: break-word; /* évite le débordement sur long texte */
       }
 
       .message.user {
@@ -218,7 +244,16 @@
         box-shadow: var(--shadow);
       }
 
-      /* Style des sources citées par l'IA */
+      .message.system {
+        background: var(--color-accent-light);
+        color: var(--color-text);
+        border: 1px solid var(--color-accent);
+        max-width: 95%;
+        align-self: center;
+        font-size: 12px;
+        padding: 8px 14px;
+      }
+
       .sources-container {
         margin-top: 8px;
         padding-top: 8px;
@@ -266,6 +301,13 @@
 
       .input-wrapper input:focus { outline: none; }
 
+      /* Désactivation visuelle pendant le chargement */
+      .input-wrapper input:disabled,
+      .send-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
       .send-btn {
         background: var(--color-text);
         color: var(--color-bg);
@@ -275,48 +317,110 @@
         cursor: pointer;
         transition: opacity 0.2s;
       }
-      .send-btn:hover { opacity: 0.9; }
-      /* RESPONSIVE DESIGN (MOBILE & TABLETTE) - VERSION FIXE SANS OVERFLOW EXTERNE */
-      @media (max-width: 768px) {
-        body {
-          height: 100vh;
-          overflow: hidden; /* Empêche la page entière de scroller */
-        }
 
+      .send-btn:hover:not(:disabled) { opacity: 0.9; }
+
+      /* Auth overlay */
+      #auth-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(13, 17, 23, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.3s ease;
+      }
+
+      .auth-box {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        padding: 40px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        text-align: center;
+      }
+
+      .auth-box i { font-size: 32px; color: var(--color-accent); margin-bottom: 16px; }
+      .auth-box h2 { color: var(--color-text); margin-bottom: 8px; text-transform: none; letter-spacing: 0; font-size: 18px; }
+      .auth-box p { font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px; }
+
+      #auth-key {
+        width: 100%;
+        padding: 12px;
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        color: var(--color-text);
+        font-family: var(--font);
+        margin-bottom: 16px;
+        text-align: center;
+        font-size: 14px;
+        transition: border-color 0.2s;
+      }
+
+      #auth-key:focus { outline: none; border-color: var(--color-accent); }
+      #auth-key.invalid { border-color: var(--color-danger) !important; }
+
+      #login-btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--color-accent);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      #login-btn:hover:not(:disabled) { opacity: 0.85; }
+      #login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      #auth-error {
+        color: var(--color-danger);
+        font-size: 12px;
+        margin-top: 12px;
+        display: none;
+      }
+
+      /* Spinner inline */
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      @media (max-width: 768px) {
         .main-container {
-          flex-direction: column; 
-          height: calc(100vh - 58px); /* Prend exactement la hauteur restante sous la navbar */
-          overflow: hidden;
+          flex-direction: column;
+          height: auto;
+          overflow-y: auto;
         }
 
         .drive-section {
           flex: none;
-          max-height: 35vh; /* Bloque l'explorateur à 35% de l'écran max */
           border-right: none;
           border-bottom: 1px solid var(--color-border);
-          padding: 12px;
-          overflow-y: auto; /* Permet de scroller dans les dossiers si besoin */
-        }
-
-        .chat-section {
-          flex: 1; /* Le chat prend TOUT l'espace restant disponible */
-          display: flex;
-          flex-direction: column;
-          height: auto; /* Supprime les 600px fixes qui cassaient tout */
-          overflow: hidden;
-        }
-
-        .chat-messages {
-          flex: 1;
-          overflow-y: auto; /* Permet aux messages de défiler de manière isolée */
           padding: 16px;
         }
 
-        .chat-input-area {
-          padding: 12px 16px;
-          background: var(--color-bg);
-          position: sticky;
-          bottom: 0; /* Verrouille l'input au ras de l'écran, juste au-dessus du clavier */
+        .chat-section {
+          flex: none;
+          height: 600px;
         }
 
         .grid-folders {
@@ -327,40 +431,52 @@
 </head>
 <body>
 
-    <div id="auth-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; justify-content: center; align-items: center;">
-        <div style="background: var(--color-surface); border: 1px solid var(--color-border); padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center;">
-            <i class="fa-solid fa-key" style="font-size: 32px; color: var(--color-accent); margin-bottom: 16px;"></i>
-            <h2 style="color: var(--color-text); margin-bottom: 8px;">Authentification Requise</h2>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px;">Accès restreint au terminal de Faneva. Saisissez votre clé d'accès sécurisée.</p>
+    <!-- ─── AUTH OVERLAY ──────────────────────────────────────────────── -->
+    <div id="auth-overlay" role="dialog" aria-modal="true" aria-label="Authentification requise">
+        <div class="auth-box">
+            <i class="fa-solid fa-key" aria-hidden="true"></i>
+            <h2>Authentification Requise</h2>
+            <p>Accès restreint au terminal de Faneva. Saisissez votre clé d'accès sécurisée.</p>
             
-            <input type="password" id="auth-key" placeholder="Entrez votre clé d'accès (JWT / Pass)" style="width: 100%; padding: 12px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 6px; color: var(--color-text); font-family: var(--font); margin-bottom: 16px; text-align: center;" />
-            <button id="login-btn" style="width: 100%; padding: 12px; background: var(--color-accent); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Déverrouiller l'Instance</button>
-            <p id="auth-error" style="color: #ff6b6b; font-size: 12px; margin-top: 12px; display: none;"><i class="fa-solid fa-triangle-exclamation"></i> Clé invalide ou expirée.</p>
+            <input type="password" id="auth-key"
+                   placeholder="Clé d'accès"
+                   autocomplete="current-password"
+                   maxlength="256"
+                   aria-label="Mot de passe" />
+
+            <button id="login-btn" type="button">Déverrouiller l'Instance</button>
+
+            <p id="auth-error" role="alert" aria-live="assertive">
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                <span id="auth-error-text">Clé invalide ou expirée.</span>
+            </p>
         </div>
     </div>
 
+    <!-- ─── HEADER ────────────────────────────────────────────────────── -->
     <header>
         <div class="logo">
-            <i class="fa-solid fa-brain"></i>
+            <i class="fa-solid fa-brain" aria-hidden="true"></i>
             <span>NeuralDrive <span style="font-weight:300;">v1.0</span></span>
         </div>
         <div style="font-size: 13px; color: var(--color-text-muted);">
-            <i class="fa-solid fa-shield-halved"></i> Connexion Chiffrée E2E
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Connexion Chiffrée E2E
         </div>
     </header>
 
+    <!-- ─── MAIN ──────────────────────────────────────────────────────── -->
     <div class="main-container">
         
-        <section class="drive-section">
+        <section class="drive-section" aria-label="Explorateur de cours">
             <div>
                 <h2>Explorateur de Cours</h2>
                 <div class="grid-folders">
-                    <div class="folder-card">
-                        <i class="fa-solid fa-folder-closed"></i>
+                    <div class="folder-card" role="button" tabindex="0">
+                        <i class="fa-solid fa-folder-closed" aria-hidden="true"></i>
                         <span>Physique</span>
                     </div>
-                    <div class="folder-card">
-                        <i class="fa-solid fa-folder-closed"></i>
+                    <div class="folder-card" role="button" tabindex="0">
+                        <i class="fa-solid fa-folder-closed" aria-hidden="true"></i>
                         <span>Informatique</span>
                     </div>
                 </div>
@@ -368,26 +484,30 @@
 
             <div>
                 <h2>Indexation Rapide</h2>
-                <div class="upload-zone" id="drop-zone">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                <input type="file" id="file-input" style="display: none;" accept=".pdf,.txt" aria-label="Sélectionner un fichier" />
+                <div class="upload-zone" id="drop-zone" role="button" tabindex="0" aria-label="Zone de dépôt de fichier">
+                    <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
                     <p style="font-size: 13px; font-weight: 500; margin-bottom: 4px;">Glissez un cours ou cliquez pour ajouter</p>
-                    <p style="font-size: 11px; color: var(--color-text-muted);">PDF, MD ou TXT uniquement</p>
+                    <p style="font-size: 11px; color: var(--color-text-muted);">PDF ou TXT uniquement (Max 10 Mo)</p>
+                    <div class="progress-bar-wrap" id="upload-progress-wrap" aria-hidden="true">
+                        <div class="progress-bar-fill" id="upload-progress-fill"></div>
+                    </div>
                 </div>
             </div>
 
             <div>
                 <h2>Documents Actifs dans la Base</h2>
-                <div class="file-list">
+                <div class="file-list" id="active-files-list" aria-live="polite">
                     <div class="file-item">
                         <div class="file-info">
-                            <i class="fa-regular fa-file-pdf"></i>
+                            <i class="fa-regular fa-file-pdf" aria-hidden="true"></i>
                             <span>Biot-Savart_Ampere.pdf</span>
                         </div>
                         <span class="status-badge">Indexé</span>
                     </div>
                     <div class="file-item">
                         <div class="file-info">
-                            <i class="fa-regular fa-file-code"></i>
+                            <i class="fa-regular fa-file-code" aria-hidden="true"></i>
                             <span>Optimisation_Postgres.md</span>
                         </div>
                         <span class="status-badge">Indexé</span>
@@ -396,13 +516,13 @@
             </div>
         </section>
 
-        <section class="chat-section">
+        <section class="chat-section" aria-label="Assistant IA">
             <div class="chat-header">
-                <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--color-accent);"></i>
+                <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--color-accent);" aria-hidden="true"></i>
                 <span>Assistant RAG Synaptique</span>
             </div>
 
-            <div class="chat-messages" id="chat-box">
+            <div class="chat-messages" id="chat-box" role="log" aria-live="polite" aria-label="Messages">
                 <div class="message ai">
                     Bonjour ! Je suis connecté à ton instance sécurisée. Pose-moi une question sur tes fichiers de Physique ou d'Informatique, je te répondrai en ciblant précisément les sources.
                 </div>
@@ -410,9 +530,13 @@
 
             <div class="chat-input-area">
                 <div class="input-wrapper">
-                    <input type="text" id="user-input" placeholder="Interroger mes documents (ex: Énonce le théorème d'Ampère)..." autocomplete="off"/>
-                    <button class="send-btn" id="send-btn">
-                        <i class="fa-solid fa-paper-plane"></i>
+                    <input type="text" id="user-input"
+                           placeholder="Interroger mes documents (ex: Énonce le théorème d'Ampère)..."
+                           autocomplete="off"
+                           maxlength="1000"
+                           aria-label="Votre question"/>
+                    <button class="send-btn" id="send-btn" type="button" aria-label="Envoyer">
+                        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -421,129 +545,379 @@
     </div>
 
     <script>
-      // Aligne le thème automatiquement avec l'environnement global
-      const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', savedTheme);
+    (() => {
+        "use strict";
 
-      // CONFIGURATION BASE URL BACKEND (COPIE TON DIRECT URL HUGGING FACE ICI)
-      const BACKEND_URL = "https://fanevarivotiana-neural-drive-backend.hf.space"; 
+        // ── CONFIGURATION ──────────────────────────────────────────────────
+        const BACKEND_URL = "https://fanevarivotiana-neural-drive-backend.hf.space";
+        const SESSION_KEY = "neural_session";
+        const MAX_FILE_BYTES = 10 * 1024 * 1024;
+        const ALLOWED_TYPES = ["application/pdf", "text/plain"];
+        const MAX_QUESTION_LENGTH = 1000;
 
-      // Gestion de l'authentification
-      const authOverlay = document.getElementById('auth-overlay');
-      const authKeyInput = document.getElementById('auth-key');
-      const loginBtn = document.getElementById('login-btn');
-      const authError = document.getElementById('auth-error');
+        // ── THÈME ──────────────────────────────────────────────────────────
+        const savedTheme = localStorage.getItem("theme") ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", savedTheme);
 
-      // Vérifie si un token JWT valide existe déjà en session
-      if (sessionStorage.getItem('neural_session')) {
-          authOverlay.style.display = 'none';
-      }
+        // ── DOM ────────────────────────────────────────────────────────────
+        const authOverlay     = document.getElementById("auth-overlay");
+        const authKeyInput    = document.getElementById("auth-key");
+        const loginBtn        = document.getElementById("login-btn");
+        const authError       = document.getElementById("auth-error");
+        const authErrorText   = document.getElementById("auth-error-text");
+        const chatBox         = document.getElementById("chat-box");
+        const userInput       = document.getElementById("user-input");
+        const sendBtn         = document.getElementById("send-btn");
+        const fileInput       = document.getElementById("file-input");
+        const dropZone        = document.getElementById("drop-zone");
+        const activeFilesList = document.getElementById("active-files-list");
+        const progressWrap    = document.getElementById("upload-progress-wrap");
+        const progressFill    = document.getElementById("upload-progress-fill");
 
-      async function verifyAccess() {
-          const key = authKeyInput.value.trim();
-          authError.style.display = 'none';
-          
-          try {
-              // Requête de connexion vers ton backend FastAPI sur Hugging Face
-              const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ password: key })
-              });
+        // ── UTILITAIRES ───────────────────────────────────────────────────
 
-              if (response.ok) {
-                  const data = await response.json();
-                  // Stockage sécurisé du jeton JWT émis par l'API cloud
-                  sessionStorage.setItem('neural_session', data.token);
-                  authOverlay.style.display = 'none';
-              } else {
-                  const errData = await response.json();
-                  authError.textContent = errData.detail || "Clé invalide.";
-                  authError.style.display = 'block';
-                  authKeyInput.style.borderColor = '#ff6b6b';
-              }
-          } catch (err) {
-              authError.textContent = "Erreur réseau : Impossible de joindre l'API Cloud.";
-              authError.style.display = 'block';
-          }
-      }
-
-      loginBtn.addEventListener('click', verifyAccess);
-      authKeyInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyAccess(); });
-
-      // Logique de l'UI et requêtes de Chat
-      const chatBox = document.getElementById('chat-box');
-      const userInput = document.getElementById('user-input');
-      const sendBtn = document.getElementById('send-btn');
-
-      function appendMessage(text, isUser = false, sources = []) {
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add('message', isUser ? 'user' : 'ai');
-        msgDiv.textContent = text;
-
-        if (!isUser && sources.length > 0) {
-          const sourcesDiv = document.createElement('div');
-          sourcesDiv.classList.add('sources-container');
-          sourcesDiv.innerHTML = `<strong>Sources :</strong>`;
-          sources.forEach(src => {
-            sourcesDiv.innerHTML += `<span class="source-tag"><i class="fa-solid fa-bookmark"></i> ${src}</span>`;
-          });
-          msgDiv.appendChild(sourcesDiv);
+        /** Sanitise une chaîne avant insertion innerHTML */
+        function sanitize(str) {
+            const div = document.createElement("div");
+            div.textContent = str;
+            return div.innerHTML;
         }
 
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
+        /** Formatage minimal Markdown (gras uniquement) */
+        function formatMarkdown(text) {
+            return sanitize(text).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        }
 
-      async function handleSend() {
-        const query = userInput.value.trim();
-        if (!query) return;
+        /** Affiche une erreur d'auth */
+        function showAuthError(msg) {
+            authErrorText.textContent = msg;
+            authError.style.display = "block";
+            authKeyInput.classList.add("invalid");
+        }
 
-        // 1. Affiche immédiatement la question de l'utilisateur
-        appendMessage(query, true);
-        userInput.value = '';
+        function hideAuthError() {
+            authError.style.display = "none";
+            authKeyInput.classList.remove("invalid");
+        }
 
-        // 2. Extraction du token JWT actif
-        const token = sessionStorage.getItem('neural_session');
+        /** Token depuis sessionStorage */
+        function getToken() {
+            return sessionStorage.getItem(SESSION_KEY);
+        }
 
-        try {
-            // Requête HTTP POST sécurisée avec en-tête d'autorisation Bearer Token
-            const response = await fetch(`${BACKEND_URL}/api/chat`, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ question: query })
-            });
+        /** Force la déconnexion */
+        function forceLogout(reason = "Session expirée. Veuillez vous reconnecter.") {
+            sessionStorage.removeItem(SESSION_KEY);
+            authOverlay.style.display = "flex";
+            authOverlay.style.opacity = "1";
+            appendMessage(reason, false, [], true);
+        }
 
-            if (response.ok) {
-                const data = await response.json();
-                // Affiche la réponse générée et liste les documents sources
-                appendMessage(data.answer, false, data.sources);
-            } else if (response.status === 401) {
-                appendMessage("Session expirée ou invalide. Veuillez rafraîchir la page pour vous reconnecter.", false, ["Sécurité"]);
-                sessionStorage.removeItem('neural_session');
+        /** Crée et insère un message dans le chat */
+        function appendMessage(text, isUser = false, sources = [], isSystem = false) {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("message");
+
+            if (isSystem) {
+                msgDiv.classList.add("system");
+                msgDiv.textContent = text;          // textContent : pas d'injection
             } else {
-                appendMessage("Une erreur est survenue lors du traitement par l'API.", false, ["Erreur"]);
+                msgDiv.classList.add(isUser ? "user" : "ai");
+                if (isUser) {
+                    msgDiv.textContent = text;      // entrée user → textContent strict
+                } else {
+                    msgDiv.innerHTML = formatMarkdown(text); // réponse IA → sanitisée
+                }
             }
-        } catch (error) {
-            appendMessage("Impossible de joindre le serveur Cloud. Vérifie ta connexion.", false, ["Réseau"]);
+
+            if (!isUser && !isSystem && sources.length > 0) {
+                const sourcesDiv = document.createElement("div");
+                sourcesDiv.classList.add("sources-container");
+                sourcesDiv.innerHTML = "<strong>Sources :</strong> ";
+                sources.forEach(src => {
+                    const tag = document.createElement("span");
+                    tag.classList.add("source-tag");
+                    tag.innerHTML = `<i class="fa-solid fa-bookmark" aria-hidden="true"></i> ${sanitize(src)}`;
+                    sourcesDiv.appendChild(tag);
+                });
+                msgDiv.appendChild(sourcesDiv);
+            }
+
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return msgDiv;
         }
-      }
 
-      sendBtn.addEventListener('click', handleSend);
-      userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+        /** Headers communs avec Auth */
+        function authHeaders(extra = {}) {
+            return {
+                "Authorization": `Bearer ${getToken()}`,
+                ...extra,
+            };
+        }
 
-      // Zone de drag & drop
-      const dropZone = document.getElementById('drop-zone');
-      dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--color-accent)'; });
-      dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--color-border)'; });
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = 'var(--color-border)';
-        alert("Fichier détecté ! Le pipeline d'importation automatique vers Qdrant sera connecté au prochain module.");
-      });
+        // ── AUTH ──────────────────────────────────────────────────────────
+
+        /** Vérifie si un token est déjà en session */
+        if (getToken()) {
+            authOverlay.style.display = "none";
+            verifierSanteConnexion();
+        }
+
+        async function verifyAccess() {
+            const key = authKeyInput.value.trim();
+            if (!key) {
+                showAuthError("Veuillez saisir une clé d'accès.");
+                return;
+            }
+            hideAuthError();
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = `<span class="spinner"></span> Vérification…`;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: key }),
+                    credentials: "omit",         // pas de cookies cross-origin
+                    signal: AbortSignal.timeout(10000), // timeout 10s
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    sessionStorage.setItem(SESSION_KEY, data.token);
+                    authKeyInput.value = "";     // vide le champ après succès
+
+                    authOverlay.style.opacity = "0";
+                    setTimeout(() => { authOverlay.style.display = "none"; }, 300);
+                    verifierSanteConnexion();
+                } else {
+                    const errData = await response.json().catch(() => ({}));
+                    showAuthError(errData.detail || "Clé invalide.");
+                }
+            } catch (err) {
+                if (err.name === "TimeoutError") {
+                    showAuthError("Délai d'attente dépassé. Vérifiez votre connexion.");
+                } else {
+                    showAuthError("Erreur réseau : impossible de joindre l'API.");
+                }
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = "Déverrouiller l'Instance";
+            }
+        }
+
+        loginBtn.addEventListener("click", verifyAccess);
+        authKeyInput.addEventListener("keypress", e => { if (e.key === "Enter") verifyAccess(); });
+
+        // ── CHAT ──────────────────────────────────────────────────────────
+
+        /** Désactive/active les contrôles de chat */
+        function setChatBusy(busy) {
+            userInput.disabled = busy;
+            sendBtn.disabled = busy;
+            sendBtn.innerHTML = busy
+                ? `<span class="spinner"></span>`
+                : `<i class="fa-solid fa-paper-plane" aria-hidden="true"></i>`;
+        }
+
+        async function handleSend() {
+            const query = userInput.value.trim();
+            if (!query) return;
+            if (query.length > MAX_QUESTION_LENGTH) {
+                appendMessage(`Question trop longue (max ${MAX_QUESTION_LENGTH} caractères).`, false, [], true);
+                return;
+            }
+
+            appendMessage(query, true);
+            userInput.value = "";
+            setChatBusy(true);
+
+            const typingIndicator = appendMessage("Analyse vectorielle des cours en cours…", false);
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                    method: "POST",
+                    headers: authHeaders({ "Content-Type": "application/json" }),
+                    body: JSON.stringify({ question: query }),
+                    credentials: "omit",
+                    signal: AbortSignal.timeout(30000),
+                });
+
+                if (response.status === 401) { forceLogout(); return; }
+                if (!response.ok) throw new Error(`Erreur serveur (HTTP ${response.status}).`);
+
+                const data = await response.json();
+
+                // Mise à jour de l'indicateur avec la réponse réelle
+                typingIndicator.innerHTML = formatMarkdown(data.answer);
+
+                if (data.sources && data.sources.length > 0) {
+                    const sourcesDiv = document.createElement("div");
+                    sourcesDiv.classList.add("sources-container");
+                    sourcesDiv.innerHTML = "<strong>Sources :</strong> ";
+                    data.sources.forEach(src => {
+                        const tag = document.createElement("span");
+                        tag.classList.add("source-tag");
+                        tag.innerHTML = `<i class="fa-solid fa-bookmark" aria-hidden="true"></i> ${sanitize(src)}`;
+                        sourcesDiv.appendChild(tag);
+                    });
+                    typingIndicator.appendChild(sourcesDiv);
+                }
+
+            } catch (err) {
+                const msg = err.name === "TimeoutError"
+                    ? "Délai dépassé. Le serveur met trop de temps à répondre."
+                    : `Erreur de liaison : ${sanitize(err.message)}`;
+                typingIndicator.innerHTML = `<span style="color: var(--color-danger);">${msg}</span>`;
+            } finally {
+                setChatBusy(false);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        sendBtn.addEventListener("click", handleSend);
+        userInput.addEventListener("keypress", e => { if (e.key === "Enter") handleSend(); });
+
+        // ── UPLOAD ────────────────────────────────────────────────────────
+
+        /** Validation du fichier côté client avant envoi */
+        function validateFile(file) {
+            if (!file) return "Aucun fichier sélectionné.";
+            if (file.size > MAX_FILE_BYTES) return `Fichier trop volumineux (max 10 Mo).`;
+            if (!ALLOWED_TYPES.includes(file.type)) return `Type non supporté. Acceptés : PDF, TXT.`;
+            // Validation basique de l'extension en plus du MIME
+            const ext = file.name.split(".").pop().toLowerCase();
+            if (!["pdf", "txt"].includes(ext)) return `Extension non supportée (.${ext}).`;
+            return null;
+        }
+
+        async function uploadFile(file) {
+            const error = validateFile(file);
+            if (error) {
+                appendMessage(`Validation : ${error}`, false, [], true);
+                return;
+            }
+
+            appendMessage(`Indexation de « ${sanitize(file.name)} » lancée…`, false, [], true);
+
+            // Affiche la progress bar
+            progressWrap.style.display = "block";
+            progressFill.style.width = "10%";
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            // Utilise XMLHttpRequest pour avoir la progression réelle
+            return new Promise(resolve => {
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.addEventListener("progress", e => {
+                    if (e.lengthComputable) {
+                        const pct = Math.round((e.loaded / e.total) * 90) + 5;
+                        progressFill.style.width = `${pct}%`;
+                    }
+                });
+
+                xhr.addEventListener("load", () => {
+                    progressFill.style.width = "100%";
+                    setTimeout(() => {
+                        progressWrap.style.display = "none";
+                        progressFill.style.width = "0%";
+                    }, 800);
+
+                    if (xhr.status === 401) { forceLogout(); resolve(); return; }
+
+                    let data;
+                    try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        appendMessage(data.message || "Fichier indexé avec succès.", false, [], true);
+
+                        const fileItem = document.createElement("div");
+                        fileItem.classList.add("file-item");
+                        const icon = file.type === "application/pdf"
+                            ? "fa-regular fa-file-pdf"
+                            : "fa-regular fa-file-lines";
+                        fileItem.innerHTML = `
+                            <div class="file-info">
+                                <i class="${icon}" aria-hidden="true"></i>
+                                <span>${sanitize(file.name)}</span>
+                            </div>
+                            <span class="status-badge">Indexé</span>
+                        `;
+                        activeFilesList.appendChild(fileItem);
+                    } else {
+                        appendMessage(
+                            `Échec de l'indexation (HTTP ${xhr.status}) : ${sanitize(data.detail || "Erreur inconnue.")}`,
+                            false, [], true
+                        );
+                    }
+                    resolve();
+                });
+
+                xhr.addEventListener("error", () => {
+                    progressWrap.style.display = "none";
+                    appendMessage("Erreur réseau lors de l'upload.", false, [], true);
+                    resolve();
+                });
+
+                xhr.addEventListener("timeout", () => {
+                    progressWrap.style.display = "none";
+                    appendMessage("Délai dépassé lors de l'upload.", false, [], true);
+                    resolve();
+                });
+
+                xhr.timeout = 60000;
+                xhr.open("POST", `${BACKEND_URL}/api/upload`);
+                xhr.setRequestHeader("Authorization", `Bearer ${getToken()}`);
+                xhr.send(formData);
+            });
+        }
+
+        // Liaison UI Upload
+        dropZone.addEventListener("click", () => fileInput.click());
+        dropZone.addEventListener("keypress", e => { if (e.key === "Enter" || e.key === " ") fileInput.click(); });
+        fileInput.addEventListener("change", e => {
+            if (e.target.files[0]) uploadFile(e.target.files[0]);
+            e.target.value = "";  // reset pour permettre le re-upload du même fichier
+        });
+
+        dropZone.addEventListener("dragover", e => {
+            e.preventDefault();
+            dropZone.classList.add("drag-over");
+        });
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+        dropZone.addEventListener("drop", e => {
+            e.preventDefault();
+            dropZone.classList.remove("drag-over");
+            if (e.dataTransfer.files.length > 0) uploadFile(e.dataTransfer.files[0]);
+        });
+
+        // ── HEALTH CHECK ─────────────────────────────────────────────────
+
+        async function verifierSanteConnexion() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/health`, {
+                    signal: AbortSignal.timeout(8000),
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                appendMessage(
+                    `Nœud Synaptique Opérationnel. Base Qdrant : ${data.qdrant}.`,
+                    false, [], true
+                );
+            } catch (e) {
+                appendMessage(
+                    "Alerte : Impossible de joindre le nœud d'API principal.",
+                    false, [], true
+                );
+            }
+        }
+
+    })(); // IIFE — isole tout du scope global
     </script>
 </body>
 </html>
