@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="fr">
   <head>
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Faneva RAVELONOMENJANAHARY</title>
@@ -17,9 +16,8 @@
     <meta property="og:url" content="https://faneva619.github.io/" />
     <meta property="og:type" content="website" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <style>
@@ -29,7 +27,6 @@
         padding: 0;
       }
 
-      /* Variables gérant le Light Mode et le Dark Mode */
       :root {
         --color-bg: #ffffff;
         --color-surface: #f8f8f8;
@@ -37,6 +34,7 @@
         --color-text: #111111;
         --color-text-muted: #666666;
         --color-accent: #0055ff;
+        --color-accent-rgb: 0, 85, 255;
         --font: 'Inter', system-ui, -apple-system, sans-serif;
         --radius: 8px;
         --shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
@@ -52,11 +50,15 @@
         --color-text: #c9d1d9;
         --color-text-muted: #8b949e;
         --color-accent: #58a6ff;
+        --color-accent-rgb: 88, 166, 255;
         --shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         --blur-bg: rgba(13, 17, 23, 0.85);
       }
 
-      html { scroll-behavior: smooth; }
+      html { 
+        scroll-behavior: smooth; 
+        scroll-padding-top: 80px;
+      }
 
       body {
         font-family: var(--font);
@@ -65,9 +67,21 @@
         line-height: 1.6;
         font-size: 16px;
         transition: background-color 0.3s, color 0.3s;
+        overflow-x: hidden;
+        cursor: none;
       }
 
-      /* Style du canvas pour le réseau de neurones arrière-plan */
+      @media (hover: none) and (pointer: coarse) {
+        body { cursor: auto; }
+        .cursor-dot, .cursor-outline { display: none; }
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 4px;
+        border-radius: 4px;
+      }
+
       #network-canvas {
         position: fixed;
         top: 0;
@@ -75,10 +89,39 @@
         width: 100vw;
         height: 100vh;
         z-index: -1;
-        pointer-events: none; /* Laisse passer les clics vers le reste du site */
+        pointer-events: none;
       }
 
-      /* ── Nav ── */
+      .cursor-dot, .cursor-outline {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      .cursor-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--color-accent);
+      }
+
+      .cursor-outline {
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--color-accent);
+        transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
+      }
+
+      .cursor-outline.hover {
+        width: 60px;
+        height: 60px;
+        background-color: rgba(var(--color-accent-rgb), 0.1);
+        border-color: transparent;
+      }
+
       nav {
         position: sticky;
         top: 0;
@@ -130,11 +173,10 @@
 
       .nav-links a:hover { color: var(--color-text); }
 
-      /* Bouton Thème */
       .theme-toggle {
         background: none;
         border: none;
-        cursor: pointer;
+        cursor: none;
         font-size: 16px;
         color: var(--color-text-muted);
         transition: color 0.2s, transform 0.2s;
@@ -152,12 +194,11 @@
         display: none;
         background: none;
         border: none;
-        cursor: pointer;
+        cursor: none;
         font-size: 20px;
         color: var(--color-text);
       }
 
-      /* ── Hero ── */
       #hero {
         max-width: var(--max-width);
         margin: 0 auto;
@@ -165,13 +206,29 @@
       }
 
       .hero-tag {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
         font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--color-accent);
         margin-bottom: 20px;
+        min-height: 1.2em;
+      }
+
+      .typewriter-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background-color: var(--color-accent);
+        animation: blink 1s step-end infinite;
+        vertical-align: text-bottom;
+        margin-left: 2px;
+      }
+
+      @keyframes blink {
+        50% { opacity: 0; }
       }
 
       .hero-name {
@@ -202,12 +259,11 @@
         font-weight: 600;
         text-decoration: none;
         border-radius: var(--radius);
-        transition: background 0.2s, opacity 0.2s;
+        transition: background 0.2s, opacity 0.2s, transform 0.2s;
       }
 
-      .hero-cta:hover { opacity: 0.9; }
+      .hero-cta:hover { opacity: 0.9; transform: translateY(-2px); }
 
-      /* ── Sections ── */
       section {
         max-width: var(--max-width);
         margin: 0 auto;
@@ -232,7 +288,6 @@
         margin-bottom: 40px;
       }
 
-      /* ── About ── */
       .about-text {
         font-size: 16px;
         color: var(--color-text-muted);
@@ -269,11 +324,11 @@
         color: var(--color-text);
       }
 
-      /* ── Projects ── */
       .projects-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 16px;
+        gap: 24px;
+        perspective: 1000px;
       }
 
       .project-card {
@@ -282,16 +337,25 @@
         padding: 28px;
         background: var(--color-surface);
         box-shadow: var(--shadow);
-        transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+        transition: box-shadow 0.3s, border-color 0.3s, transform 0.1s ease-out;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        transform-style: preserve-3d;
+        will-change: transform;
+        cursor: none;
       }
 
       .project-card:hover {
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
-        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         border-color: var(--color-accent);
+      }
+
+      .project-card-inner {
+        transform: translateZ(20px);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
 
       .project-card-top {
@@ -315,10 +379,10 @@
         font-size: 15px;
         color: var(--color-text-muted);
         text-decoration: none;
-        transition: color 0.2s;
+        transition: color 0.2s, transform 0.2s;
       }
 
-      .project-links a:hover { color: var(--color-text); }
+      .project-links a:hover { color: var(--color-text); transform: translateY(-2px); }
 
       .project-name {
         font-size: 16px;
@@ -350,9 +414,14 @@
         background: var(--color-bg);
         border: 1px solid var(--color-border);
         color: var(--color-text-muted);
+        transition: border-color 0.2s, color 0.2s;
       }
 
-      /* ── Skills ── */
+      .project-card:hover .tag {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+      }
+
       .skills-groups {
         display: flex;
         flex-direction: column;
@@ -382,16 +451,17 @@
         background: var(--color-surface);
         border: 1px solid var(--color-border);
         color: var(--color-text);
-        transition: border-color 0.2s, background 0.2s;
-        cursor: default;
+        transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+        cursor: none;
       }
 
       .skill-tag:hover {
         border-color: var(--color-accent);
         background: var(--color-bg);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--color-accent-rgb), 0.15);
       }
 
-      /* ── Contact ── */
       .contact-intro {
         font-size: 16px;
         color: var(--color-text-muted);
@@ -420,13 +490,15 @@
         border-radius: var(--radius);
         background: var(--color-surface);
         box-shadow: var(--shadow);
-        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.2s;
+        cursor: none;
       }
 
       .contact-link:hover {
         border-color: var(--color-accent);
         background: var(--color-bg);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 12px rgba(var(--color-accent-rgb), 0.15);
+        transform: translateX(4px);
       }
 
       .contact-link i {
@@ -435,7 +507,10 @@
         text-align: center;
         color: var(--color-text-muted);
         flex-shrink: 0;
+        transition: color 0.2s;
       }
+
+      .contact-link:hover i { color: var(--color-accent); }
 
       .contact-link span { flex: 1; }
 
@@ -443,13 +518,22 @@
         font-size: 11px;
         color: var(--color-text-muted);
         flex-shrink: 0;
+        transition: transform 0.2s, color 0.2s;
+      }
+
+      .contact-link:hover .arrow {
+        transform: translate(2px, -2px);
+        color: var(--color-accent);
       }
 
       .contact-plain {
         cursor: text;
       }
+      .contact-plain:hover {
+        transform: none;
+        box-shadow: var(--shadow);
+      }
 
-      /* ── Footer ── */
       footer {
         border-top: 1px solid var(--color-border);
         padding: 28px 24px;
@@ -482,13 +566,14 @@
         font-size: 14px;
         color: var(--color-text-muted);
         text-decoration: none;
-        transition: color 0.2s;
+        transition: color 0.2s, transform 0.2s;
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        cursor: none;
       }
 
-      .footer-socials a:hover { color: var(--color-text); }
+      .footer-socials a:hover { color: var(--color-text); transform: translateY(-2px); }
 
       .orcid-icon {
         width: 16px;
@@ -496,7 +581,17 @@
         vertical-align: middle;
       }
 
-      /* ── Responsive ── */
+      .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
       @media (max-width: 600px) {
         .nav-links {
           display: none;
@@ -520,6 +615,8 @@
   </head>
   <body>
 
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
     <canvas id="network-canvas"></canvas>
 
     <nav>
@@ -542,8 +639,8 @@
       </div>
     </nav>
 
-    <div id="hero">
-      <span class="hero-tag">Recherche & Ingénierie</span>
+    <div id="hero" class="reveal">
+      <span class="hero-tag" id="typewriter-text"></span>
       <h1 class="hero-name">Bonjour, je suis<br>Faneva R.</h1>
       <p class="hero-bio">
         Passionné par les systèmes distribués, l'apprentissage automatique et la recherche appliquée.
@@ -554,7 +651,7 @@
       </a>
     </div>
 
-    <section id="about">
+    <section id="about" class="reveal">
       <p class="section-label">Bio</p>
       <h2 class="section-title">À propos</h2>
       <div class="about-text">
@@ -588,86 +685,94 @@
       <h2 class="section-title">Projets</h2>
       <div class="projects-grid">
 
-        <div class="project-card">
-          <div class="project-card-top">
-            <i class="fa-solid fa-brain project-icon"></i>
-            <div class="project-links">
-              <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <div class="project-card reveal" tabindex="0">
+          <div class="project-card-inner">
+            <div class="project-card-top">
+              <i class="fa-solid fa-brain project-icon"></i>
+              <div class="project-links">
+                <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+              </div>
             </div>
-          </div>
-          <div class="project-name">LLM-Compress</div>
-          <div class="project-desc">
-            Exploration de techniques de quantification et d'élagage pour réduire l'empreinte mémoire
-            des grands modèles de langage sans perte significative de performance.
-          </div>
-          <div class="project-tags">
-            <span class="tag">Python</span>
-            <span class="tag">PyTorch</span>
-            <span class="tag">NLP</span>
+            <div class="project-name">LLM-Compress</div>
+            <div class="project-desc">
+              Exploration de techniques de quantification et d'élagage pour réduire l'empreinte mémoire
+              des grands modèles de langage sans perte significative de performance.
+            </div>
+            <div class="project-tags">
+              <span class="tag">Python</span>
+              <span class="tag">PyTorch</span>
+              <span class="tag">NLP</span>
+            </div>
           </div>
         </div>
 
-        <div class="project-card">
-          <div class="project-card-top">
-            <i class="fa-solid fa-network-wired project-icon"></i>
-            <div class="project-links">
-              <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <div class="project-card reveal" tabindex="0">
+          <div class="project-card-inner">
+            <div class="project-card-top">
+              <i class="fa-solid fa-network-wired project-icon"></i>
+              <div class="project-links">
+                <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+              </div>
             </div>
-          </div>
-          <div class="project-name">DistCache</div>
-          <div class="project-desc">
-            Implémentation d'un système de cache distribué cohérent basé sur le protocole Raft,
-            avec gestion des pannes et réplication automatique des données.
-          </div>
-          <div class="project-tags">
-            <span class="tag">Go</span>
-            <span class="tag">Raft</span>
-            <span class="tag">Systèmes Distribués</span>
+            <div class="project-name">DistCache</div>
+            <div class="project-desc">
+              Implémentation d'un système de cache distribué cohérent basé sur le protocole Raft,
+              avec gestion des pannes et réplication automatique des données.
+            </div>
+            <div class="project-tags">
+              <span class="tag">Go</span>
+              <span class="tag">Raft</span>
+              <span class="tag">Systèmes Distribués</span>
+            </div>
           </div>
         </div>
 
-        <div class="project-card">
-          <div class="project-card-top">
-            <i class="fa-solid fa-diagram-project project-icon"></i>
-            <div class="project-links">
-              <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <div class="project-card reveal" tabindex="0">
+          <div class="project-card-inner">
+            <div class="project-card-top">
+              <i class="fa-solid fa-diagram-project project-icon"></i>
+              <div class="project-links">
+                <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+              </div>
             </div>
-          </div>
-          <div class="project-name">GraphSight</div>
-          <div class="project-desc">
-            Outil de visualisation interactive de graphes de connaissances, permettant l'exploration
-            de relations sémantiques entre entités issues de corpus scientifiques.
-          </div>
-          <div class="project-tags">
-            <span class="tag">JavaScript</span>
-            <span class="tag">D3.js</span>
-            <span class="tag">Graph ML</span>
+            <div class="project-name">GraphSight</div>
+            <div class="project-desc">
+              Outil de visualisation interactive de graphes de connaissances, permettant l'exploration
+              de relations sémantiques entre entités issues de corpus scientifiques.
+            </div>
+            <div class="project-tags">
+              <span class="tag">JavaScript</span>
+              <span class="tag">D3.js</span>
+              <span class="tag">Graph ML</span>
+            </div>
           </div>
         </div>
 
-        <div class="project-card">
-          <div class="project-card-top">
-            <i class="fa-solid fa-shield-halved project-icon"></i>
-            <div class="project-links">
-              <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <div class="project-card reveal" tabindex="0">
+          <div class="project-card-inner">
+            <div class="project-card-top">
+              <i class="fa-solid fa-shield-halved project-icon"></i>
+              <div class="project-links">
+                <a href="https://github.com/faneva619" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
+              </div>
             </div>
-          </div>
-          <div class="project-name">SecurePrompt</div>
-          <div class="project-desc">
-            Étude et démonstration des vulnérabilités de prompt injection dans les LLMs, avec
-            un benchmark de mécanismes de défense comparés sur différents modèles open source.
-          </div>
-          <div class="project-tags">
-            <span class="tag">Python</span>
-            <span class="tag">Sécurité IA</span>
-            <span class="tag">LLM</span>
+            <div class="project-name">SecurePrompt</div>
+            <div class="project-desc">
+              Étude et démonstration des vulnérabilités de prompt injection dans les LLMs, avec
+              un benchmark de mécanismes de défense comparés sur différents modèles open source.
+            </div>
+            <div class="project-tags">
+              <span class="tag">Python</span>
+              <span class="tag">Sécurité IA</span>
+              <span class="tag">LLM</span>
+            </div>
           </div>
         </div>
 
       </div>
     </section>
 
-    <section id="skills">
+    <section id="skills" class="reveal">
       <p class="section-label">Savoir-faire</p>
       <h2 class="section-title">Compétences</h2>
       <div class="skills-groups">
@@ -675,46 +780,46 @@
         <div>
           <div class="skills-group-label">Langages</div>
           <div class="skills-tags">
-            <span class="skill-tag">Python</span>
-            <span class="skill-tag">Go</span>
-            <span class="skill-tag">JavaScript / TypeScript</span>
-            <span class="skill-tag">C / C++</span>
-            <span class="skill-tag">SQL</span>
-            <span class="skill-tag">Bash</span>
+            <span class="skill-tag" tabindex="0">Python</span>
+            <span class="skill-tag" tabindex="0">Go</span>
+            <span class="skill-tag" tabindex="0">JavaScript / TypeScript</span>
+            <span class="skill-tag" tabindex="0">C / C++</span>
+            <span class="skill-tag" tabindex="0">SQL</span>
+            <span class="skill-tag" tabindex="0">Bash</span>
           </div>
         </div>
 
         <div>
           <div class="skills-group-label">Frameworks & Outils</div>
           <div class="skills-tags">
-            <span class="skill-tag">PyTorch</span>
-            <span class="skill-tag">Hugging Face</span>
-            <span class="skill-tag">Django / FastAPI</span>
-            <span class="skill-tag">React.js</span>
-            <span class="skill-tag">PostgreSQL</span>
-            <span class="skill-tag">NumPy / SciPy</span>
-            <span class="skill-tag">Docker</span>
-            <span class="skill-tag">Git & GitHub</span>
-            <span class="skill-tag">Linux (Kali/Ubuntu)</span>
-            <span class="skill-tag">LaTeX</span>
+            <span class="skill-tag" tabindex="0">PyTorch</span>
+            <span class="skill-tag" tabindex="0">Hugging Face</span>
+            <span class="skill-tag" tabindex="0">Django / FastAPI</span>
+            <span class="skill-tag" tabindex="0">React.js</span>
+            <span class="skill-tag" tabindex="0">PostgreSQL</span>
+            <span class="skill-tag" tabindex="0">NumPy / SciPy</span>
+            <span class="skill-tag" tabindex="0">Docker</span>
+            <span class="skill-tag" tabindex="0">Git & GitHub</span>
+            <span class="skill-tag" tabindex="0">Linux (Kali/Ubuntu)</span>
+            <span class="skill-tag" tabindex="0">LaTeX</span>
           </div>
         </div>
 
         <div>
           <div class="skills-group-label">Domaines d'intérêt & Recherche</div>
           <div class="skills-tags">
-            <span class="skill-tag">Apprentissage Machine (Deep Learning)</span>
-            <span class="skill-tag">Traitement du Langage Naturel (NLP)</span>
-            <span class="skill-tag">Systèmes Distribués & Cache</span>
-            <span class="skill-tag">Sécurité de l'IA</span>
-            <span class="skill-tag">Physique Numérique & Optimisation</span>
+            <span class="skill-tag" tabindex="0">Apprentissage Machine (Deep Learning)</span>
+            <span class="skill-tag" tabindex="0">Traitement du Langage Naturel (NLP)</span>
+            <span class="skill-tag" tabindex="0">Systèmes Distribués & Cache</span>
+            <span class="skill-tag" tabindex="0">Sécurité de l'IA</span>
+            <span class="skill-tag" tabindex="0">Physique Numérique & Optimisation</span>
           </div>
         </div>
 
       </div>
     </section>
 
-    <section id="contact">
+    <section id="contact" class="reveal">
       <p class="section-label">Me joindre</p>
       <h2 class="section-title">Contact</h2>
       <p class="contact-intro">
@@ -744,7 +849,7 @@
       </div>
     </section>
 
-    <footer>
+    <footer class="reveal">
       <div class="footer-inner">
         <span class="footer-copy">© <span id="year"></span> Faneva R. Tous droits réservés.</span>
         <div class="footer-socials">
@@ -765,25 +870,17 @@
     </footer>
 
     <script>
-      // Gestion de l'année automatique
       document.getElementById('year').textContent = new Date().getFullYear();
 
-      // Gestion du menu Mobile
       const toggle = document.getElementById('nav-toggle');
       const navLinks = document.getElementById('nav-links');
-
-      toggle.addEventListener('click', () => {
-        navLinks.classList.toggle('open');
-      });
-
+      toggle.addEventListener('click', () => navLinks.classList.toggle('open'));
       navLinks.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => navLinks.classList.remove('open'));
       });
 
-      // Gestion du Mode Sombre / Clair
       const themeToggle = document.getElementById('theme-toggle');
       const icon = themeToggle.querySelector('i');
-      
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       
@@ -808,128 +905,245 @@
         }
       });
 
-      // ── SIMULATION DU RÉSEAU DE NEURONES (CANVAS) ──
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        let mouseX = 0, mouseY = 0;
+        let outlineX = 0, outlineY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          cursorDot.style.left = `${mouseX}px`;
+          cursorDot.style.top = `${mouseY}px`;
+        });
+
+        function animateCursor() {
+          outlineX += (mouseX - outlineX) * 0.15;
+          outlineY += (mouseY - outlineY) * 0.15;
+          cursorOutline.style.left = `${outlineX}px`;
+          cursorOutline.style.top = `${outlineY}px`;
+          requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        const interactables = document.querySelectorAll('a, button, .project-card, .skill-tag, .theme-toggle, .nav-toggle');
+        interactables.forEach(el => {
+          el.addEventListener('mouseenter', () => cursorOutline.classList.add('hover'));
+          el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover'));
+        });
+      }
+
+      document.querySelectorAll('.project-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -5;
+          const rotateY = ((x - centerX) / centerX) * 5;
+          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+        });
+      });
+
+      const textToType = "Recherche & Ingénierie";
+      const typeWriterElement = document.getElementById('typewriter-text');
+      let charIndex = 0;
+      
+      function typeWriter() {
+        if (charIndex < textToType.length) {
+          typeWriterElement.textContent += textToType.charAt(charIndex);
+          charIndex++;
+          setTimeout(typeWriter, 80);
+        } else {
+          const cursor = document.createElement('span');
+          cursor.className = 'typewriter-cursor';
+          typeWriterElement.appendChild(cursor);
+        }
+      }
+      setTimeout(typeWriter, 600);
+
       const canvas = document.getElementById('network-canvas');
       const ctx = canvas.getContext('2d');
-
+      let width, height, dpr;
       let nodes = [];
-      const numNodes = 75; // Ajustable selon la densité souhaitée
-      const maxDistance = 120; 
-      let mouse = { x: null, y: null };
+      let packets = [];
+      const numNodes = 65;
+      const connectionDistance = 160;
+      let mousePos = { x: -1000, y: -1000 };
+      let animationFrameId;
 
       function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        width = window.innerWidth;
+        height = window.innerHeight;
       }
       window.addEventListener('resize', resizeCanvas);
       resizeCanvas();
 
       window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
+        mousePos.x = e.clientX;
+        mousePos.y = e.clientY;
       });
 
       window.addEventListener('mouseout', () => {
-        mouse.x = null;
-        mouse.y = null;
+        mousePos.x = -1000;
+        mousePos.y = -1000;
       });
 
       class Node {
         constructor() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.vx = (Math.random() - 0.5) * 0.6;
-          this.vy = (Math.random() - 0.5) * 0.6;
-          this.radius = Math.random() * 2 + 1;
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.vx = (Math.random() - 0.5) * 0.4;
+          this.vy = (Math.random() - 0.5) * 0.4;
+          this.baseRadius = Math.random() * 2 + 1.5;
+          this.radius = this.baseRadius;
+          this.pulseOffset = Math.random() * Math.PI * 2;
         }
 
         update() {
           this.x += this.vx;
           this.y += this.vy;
 
-          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+          if (this.x < 0 || this.x > width) this.vx *= -1;
+          if (this.y < 0 || this.y > height) this.vy *= -1;
 
-          // Légère attraction vers le curseur
-          if (mouse.x !== null && mouse.y !== null) {
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 180) {
-              this.x += (dx / dist) * 0.2;
-              this.y += (dy / dist) * 0.2;
-            }
+          const dx = mousePos.x - this.x;
+          const dy = mousePos.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 220) {
+            this.x += (dx / dist) * 0.6;
+            this.y += (dy / dist) * 0.6;
           }
+
+          this.radius = this.baseRadius + Math.sin(Date.now() * 0.003 + this.pulseOffset) * 0.6;
         }
 
-        draw(color) {
+        draw(isDark) {
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.fillStyle = color;
+          ctx.fillStyle = isDark ? 'rgba(88, 166, 255, 0.6)' : 'rgba(0, 85, 255, 0.5)';
           ctx.fill();
         }
       }
 
-      // Initialisation des nœuds
+      class Packet {
+        constructor(nodeA, nodeB) {
+          this.nodeA = nodeA;
+          this.nodeB = nodeB;
+          this.progress = 0;
+          this.speed = 0.008 + Math.random() * 0.015;
+          this.size = 2.5;
+        }
+
+        update() {
+          this.progress += this.speed;
+          return this.progress >= 1;
+        }
+
+        draw(isDark) {
+          const x = this.nodeA.x + (this.nodeB.x - this.nodeA.x) * this.progress;
+          const y = this.nodeA.y + (this.nodeB.y - this.nodeA.y) * this.progress;
+          ctx.beginPath();
+          ctx.arc(x, y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = isDark ? 'rgba(88, 166, 255, 0.95)' : 'rgba(0, 85, 255, 0.9)';
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = isDark ? 'rgba(88, 166, 255, 0.8)' : 'rgba(0, 85, 255, 0.8)';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
       for (let i = 0; i < numNodes; i++) {
         nodes.push(new Node());
       }
 
-      // Boucle d'animation principale
       function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Lecture dynamique du thème injecté par ton script principal
+        ctx.clearRect(0, 0, width, height);
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const nodeColor = isDark ? 'rgba(88, 166, 255, 0.45)' : 'rgba(0, 85, 255, 0.35)';
-        const lineColor = isDark ? 'rgba(48, 54, 61, ' : 'rgba(228, 228, 228, ';
-
+        
         nodes.forEach(node => {
           node.update();
-          node.draw(nodeColor);
+          node.draw(isDark);
         });
 
-        // Calcul des synapses entre nœuds
         for (let i = 0; i < nodes.length; i++) {
           for (let j = i + 1; j < nodes.length; j++) {
-            let dx = nodes[i].x - nodes[j].x;
-            let dy = nodes[i].y - nodes[j].y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < maxDistance) {
-              let alpha = (1 - dist / maxDistance) * 0.4;
+            if (dist < connectionDistance) {
+              const alpha = (1 - dist / connectionDistance) * 0.35;
               ctx.beginPath();
               ctx.moveTo(nodes[i].x, nodes[i].y);
               ctx.lineTo(nodes[j].x, nodes[j].y);
-              ctx.strokeStyle = lineColor + alpha + ')';
-              ctx.lineWidth = 0.6;
+              ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
+              ctx.lineWidth = 0.8;
               ctx.stroke();
+
+              if (Math.random() < 0.003) {
+                packets.push(new Packet(nodes[i], nodes[j]));
+              }
             }
           }
-
-          // Connexion interactive au curseur
-          if (mouse.x !== null && mouse.y !== null) {
-            let dx = nodes[i].x - mouse.x;
-            let dy = nodes[i].y - mouse.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 150) {
-              let alpha = (1 - dist / 150) * 0.5;
-              ctx.beginPath();
-              ctx.moveTo(nodes[i].x, nodes[i].y);
-              ctx.lineTo(mouse.x, mouse.y);
-              // Éclairage de la synapse active vers le curseur
-              ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
-              ctx.lineWidth = 0.9;
-              ctx.stroke();
-            }
+          
+          const mdx = nodes[i].x - mousePos.x;
+          const mdy = nodes[i].y - mousePos.y;
+          const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+          if (mDist < 180) {
+            const alpha = (1 - mDist / 180) * 0.6;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(mousePos.x, mousePos.y);
+            ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
           }
         }
 
-        requestAnimationFrame(animate);
+        for (let i = packets.length - 1; i >= 0; i--) {
+          const finished = packets[i].update();
+          packets[i].draw(isDark);
+          if (finished) {
+            packets.splice(i, 1);
+          }
+        }
+
+        animationFrameId = requestAnimationFrame(animate);
       }
 
       animate();
-    </script>
 
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          cancelAnimationFrame(animationFrameId);
+        } else {
+          animate();
+        }
+      });
+    </script>
   </body>
 </html>
+
