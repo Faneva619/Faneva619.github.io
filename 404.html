@@ -2,12 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>404 — Signal Perdu</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <meta name="description" content="Page 404 - Signal perdu. Jouez pour stabiliser le réseau et revenir au portfolio de Faneva RAVELONOMENJANAHARY." />
+    
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
 
@@ -16,29 +17,21 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+        -webkit-tap-highlight-color: transparent;
       }
 
       :root {
-        --color-bg: #ffffff;
-        --color-surface: #f8f8f8;
-        --color-border: #e4e4e4;
-        --color-text: #111111;
-        --color-text-muted: #666666;
-        --color-accent: #0055ff;
-        --font: 'Inter', system-ui, -apple-system, sans-serif;
-        --radius: 8px;
-        --shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-        --max-width: 820px;
-      }
-
-      [data-theme="dark"] {
         --color-bg: #0d1117;
         --color-surface: #161b22;
         --color-border: #30363d;
         --color-text: #c9d1d9;
         --color-text-muted: #8b949e;
         --color-accent: #58a6ff;
-        --shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        --color-accent-rgb: 88, 166, 255;
+        --color-danger: #f85149;
+        --color-success: #3fb950;
+        --font: 'Inter', system-ui, -apple-system, sans-serif;
+        --radius: 8px;
       }
 
       body {
@@ -46,278 +39,616 @@
         background-color: var(--color-bg);
         color: var(--color-text);
         height: 100vh;
+        width: 100vw;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background-color 0.3s, color 0.3s;
+        user-select: none;
       }
 
-      #network-canvas {
+      #game-canvas {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
         z-index: 1;
-        cursor: crosshair;
       }
 
-      /* Conteneur de l'erreur superposé au jeu */
-      .error-container {
+      .ui-layer {
         position: relative;
         z-index: 10;
-        max-width: 500px;
-        padding: 40px;
-        background: var(--color-surface);
+        width: 100%;
+        max-width: 600px;
+        padding: 0 24px;
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .hud {
+        position: fixed;
+        top: 24px;
+        left: 24px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        pointer-events: none;
+      }
+
+      .hud-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+      }
+
+      .hud-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--color-accent);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .error-container {
+        background: rgba(13, 17, 23, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid var(--color-border);
         border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        text-align: center;
+        padding: 40px 32px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         pointer-events: auto;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        background: rgba(var(--color-surface), 0.85);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .error-container.hidden {
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
       }
 
       h1 {
-        font-size: 5rem;
-        font-weight: 700;
+        font-size: 4rem;
+        font-weight: 800;
         line-height: 1;
-        letter-spacing: -0.03em;
-        color: var(--color-text);
-        margin-bottom: 10px;
+        letter-spacing: -0.04em;
+        background: linear-gradient(135deg, var(--color-text) 0%, var(--color-accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
       }
 
-      p {
-        font-size: 15px;
+      .subtitle {
+        font-size: 16px;
         color: var(--color-text-muted);
-        line-height: 1.6;
+        line-height: 1.5;
         margin-bottom: 24px;
       }
 
       .game-status {
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         color: var(--color-accent);
         margin-bottom: 24px;
-        min-height: 18px;
+        min-height: 20px;
       }
 
       .hero-cta {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
-        padding: 12px 24px;
-        background: var(--color-text);
-        color: var(--color-bg);
-        font-size: 14px;
+        padding: 14px 28px;
+        background: var(--color-accent);
+        color: #ffffff;
+        font-size: 15px;
         font-weight: 600;
         text-decoration: none;
         border-radius: var(--radius);
-        transition: background 0.2s, opacity 0.2s;
         border: none;
         cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(var(--color-accent-rgb), 0.3);
       }
 
-      .hero-cta:hover { opacity: 0.9; }
+      .hero-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.4);
+      }
+
+      .hero-cta:active {
+        transform: translateY(0);
+      }
+
+      .controls-hint {
+        margin-top: 20px;
+        font-size: 12px;
+        color: var(--color-text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .key {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 8px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-text);
+      }
+
+      @media (max-width: 600px) {
+        h1 { font-size: 3rem; }
+        .error-container { padding: 32px 20px; }
+        .hud { top: 16px; left: 16px; }
+      }
     </style>
 </head>
 <body>
 
-    <canvas id="network-canvas"></canvas>
+    <canvas id="game-canvas"></canvas>
 
-    <div class="error-container">
-        <h1>404</h1>
-        <p>Erreur de routage. Ce segment du réseau est introuvable ou a été désactivé.</p>
-        <div class="game-status" id="game-status">Cliquez pour stabiliser le réseau (0/5)</div>
-        <a href="https://faneva619.github.io/" class="hero-cta">
-            Revenir au Hub <i class="fa-solid fa-arrow-right fa-sm"></i>
-        </a>
+    <div class="hud">
+        <div>
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="score-display">0</div>
+        </div>
+        <div>
+            <div class="hud-label">Record</div>
+            <div class="hud-value" id="highscore-display">0</div>
+        </div>
+    </div>
+
+    <div class="ui-layer">
+        <div class="error-container" id="menu-container">
+            <h1>404</h1>
+            <p class="subtitle">Erreur de routage. Le segment du réseau est introuvable.<br>Propagez le signal pour stabiliser le système.</p>
+            <div class="game-status" id="game-status">Prêt à initialiser</div>
+            <button class="hero-cta" id="start-btn">
+                Lancer la propagation <i class="fa-solid fa-play fa-sm"></i>
+            </button>
+            <div class="controls-hint">
+                <span class="key">ESPACE</span> ou <span class="key">CLIC</span> pour sauter
+            </div>
+        </div>
     </div>
 
     <script>
-      // 1. Alignement strict du thème sauvegardé sur l'index
-      const savedTheme = localStorage.getItem('theme');
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-
-      // 2. Configuration du Canvas intégrant la mécanique de jeu
-      const canvas = document.getElementById('network-canvas');
+      // --- Configuration & État ---
+      const canvas = document.getElementById('game-canvas');
       const ctx = canvas.getContext('2d');
-      const statusText = document.getElementById('game-status');
+      const scoreDisplay = document.getElementById('score-display');
+      const highScoreDisplay = document.getElementById('highscore-display');
+      const menuContainer = document.getElementById('menu-container');
+      const gameStatus = document.getElementById('game-status');
+      const startBtn = document.getElementById('start-btn');
 
-      let nodes = [];
-      const numNodes = 85; 
-      const maxDistance = 125; 
-      let mouse = { x: null, y: null };
-      let shockwaves = []; // Stockage des ondes de clic
-      let clickCount = 0;
+      let width, height, dpr;
+      let gameState = 'MENU'; // MENU, PLAYING, GAMEOVER
+      let score = 0;
+      let highScore = parseInt(localStorage.getItem('faneva_404_highscore') || '0', 10);
+      let gameSpeed = 5;
+      let frameCount = 0;
 
-      function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+      highScoreDisplay.textContent = highScore;
+
+      // --- Entités ---
+      const groundLevel = 100; // Distance from bottom
+      
+      const player = {
+        x: 100,
+        y: 0,
+        radius: 12,
+        vy: 0,
+        gravity: 0.6,
+        jumpForce: -11,
+        grounded: false,
+        jumpHeld: false,
+        trail: []
+      };
+
+      let obstacles = [];
+      let packets = [];
+      let particles = [];
+      let gridOffset = 0;
+
+      // --- Initialisation ---
+      function resize() {
+        dpr = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        
+        player.y = height - groundLevel - player.radius;
       }
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
+      window.addEventListener('resize', resize);
+      resize();
 
-      window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-      });
+      function resetGame() {
+        score = 0;
+        gameSpeed = 5;
+        frameCount = 0;
+        obstacles = [];
+        packets = [];
+        particles = [];
+        player.y = height - groundLevel - player.radius;
+        player.vy = 0;
+        player.grounded = true;
+        player.trail = [];
+        scoreDisplay.textContent = '0';
+      }
 
-      // L'interaction devient mécanique de jeu : Ondes de choc synaptiques au clic
-      window.addEventListener('click', (e) => {
-        // Crée une perturbation à l'épicentre du clic
-        shockwaves.push({
-          x: e.clientX,
-          y: e.clientY,
-          currentRadius: 0,
-          maxRadius: 150,
-          force: 8
-        });
+      function startGame() {
+        resetGame();
+        gameState = 'PLAYING';
+        menuContainer.classList.add('hidden');
+        gameStatus.textContent = "Propagation en cours...";
+      }
 
-        clickCount++;
-        if (clickCount < 5) {
-          statusText.textContent = `Impulsions synaptiques : ${clickCount}/5`;
-        } else if (clickCount === 5) {
-          statusText.textContent = "Réseau stabilisé ! Le Hub est accessible.";
-          statusText.style.color = "#2ea44f"; // Vert de validation classique
+      function gameOver() {
+        gameState = 'GAMEOVER';
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('faneva_404_highscore', highScore);
+          highScoreDisplay.textContent = highScore;
+          gameStatus.textContent = "Nouveau record !";
+          gameStatus.style.color = "var(--color-success)";
         } else {
-          statusText.textContent = `Impulsions de surcharge : ${clickCount}`;
+          gameStatus.textContent = "Signal perdu. Connexion interrompue.";
+          gameStatus.style.color = "var(--color-danger)";
         }
-      });
-
-      class Node {
-        constructor() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.vx = (Math.random() - 0.5) * 0.7;
-          this.vy = (Math.random() - 0.5) * 0.7;
-          this.radius = Math.random() * 2 + 1;
-        }
-
-        update() {
-          this.x += this.vx;
-          this.y += this.vy;
-
-          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-
-          // Attraction naturelle vers le pointeur
-          if (mouse.x !== null && mouse.y !== null) {
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 180) {
-              this.x += (dx / dist) * 0.22;
-              this.y += (dy / dist) * 0.22;
-            }
-          }
-
-          // Force de l'onde de choc (Répulsion dynamique)
-          shockwaves.forEach(wave => {
-            let dx = this.x - wave.x;
-            let dy = this.y - wave.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-
-            // Si le neurone est touché par le front de l'onde
-            if (dist < wave.currentRadius + 15 && dist > wave.currentRadius - 15) {
-              let force = (1 - dist / wave.maxRadius) * wave.force;
-              if (force > 0) {
-                this.x += (dx / dist) * force;
-                this.y += (dy / dist) * force;
-              }
-            }
+        
+        // Explosion de particules
+        for (let i = 0; i < 30; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 2 + Math.random() * 6;
+          particles.push({
+            x: player.x,
+            y: player.y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1.0,
+            color: '#58a6ff',
+            size: 2 + Math.random() * 3
           });
         }
 
-        draw(color) {
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.fillStyle = color;
-          ctx.fill();
-        }
+        setTimeout(() => {
+          menuContainer.classList.remove('hidden');
+          startBtn.innerHTML = 'Réessayer <i class="fa-solid fa-rotate-right fa-sm"></i>';
+        }, 800);
       }
 
-      for (let i = 0; i < numNodes; i++) {
-        nodes.push(new Node());
-      }
-
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const nodeColor = isDark ? 'rgba(88, 166, 255, 0.45)' : 'rgba(0, 85, 255, 0.35)';
-        const lineColor = isDark ? 'rgba(48, 54, 61, ' : 'rgba(228, 228, 228, ';
-
-        // Mise à jour et propagation des ondes de choc
-        shockwaves.forEach((wave, index) => {
-          wave.currentRadius += 4;
+      // --- Input ---
+      function handleJumpStart() {
+        if (gameState === 'PLAYING' && player.grounded) {
+          player.vy = player.jumpForce;
+          player.grounded = false;
+          player.jumpHeld = true;
           
-          // Dessin du front de l'onde synaptique
-          ctx.beginPath();
-          ctx.arc(wave.x, wave.y, wave.currentRadius, 0, Math.PI * 2);
-          let alpha = (1 - wave.currentRadius / wave.maxRadius) * 0.25;
-          ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-
-          if (wave.currentRadius > wave.maxRadius) {
-            shockwaves.splice(index, 1);
+          // Particules de saut
+          for (let i = 0; i < 8; i++) {
+            particles.push({
+              x: player.x,
+              y: player.y + player.radius,
+              vx: (Math.random() - 0.5) * 4,
+              vy: Math.random() * 2,
+              life: 0.6,
+              color: '#8b949e',
+              size: 2
+            });
           }
-        });
-
-        nodes.forEach(node => {
-          node.update();
-          node.draw(nodeColor);
-        });
-
-        // Construction du maillage structurel (Synapses)
-        for (let i = 0; i < nodes.length; i++) {
-          for (let j = i + 1; j < nodes.length; j++) {
-            let dx = nodes[i].x - nodes[j].x;
-            let dy = nodes[i].y - nodes[j].y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < maxDistance) {
-              let alpha = (1 - dist / maxDistance) * 0.4;
-              ctx.beginPath();
-              ctx.moveTo(nodes[i].x, nodes[i].y);
-              ctx.lineTo(nodes[j].x, nodes[j].y);
-              ctx.strokeStyle = lineColor + alpha + ')';
-              ctx.lineWidth = 0.6;
-              ctx.stroke();
-            }
-          }
-
-          // Connexions directes au curseur
-          if (mouse.x !== null && mouse.y !== null) {
-            let dx = nodes[i].x - mouse.x;
-            let dy = nodes[i].y - mouse.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 150) {
-              let alpha = (1 - dist / 150) * 0.5;
-              ctx.beginPath();
-              ctx.moveTo(nodes[i].x, nodes[i].y);
-              ctx.lineTo(mouse.x, mouse.y);
-              ctx.strokeStyle = isDark ? `rgba(88, 166, 255, ${alpha})` : `rgba(0, 85, 255, ${alpha})`;
-              ctx.lineWidth = 0.9;
-              ctx.stroke();
-            }
+        } else if (gameState === 'MENU' || gameState === 'GAMEOVER') {
+          // Petit délai pour éviter le double-clic accidentel
+          if (gameState === 'GAMEOVER' && !menuContainer.classList.contains('hidden')) {
+             // handled by button, but spacebar can also trigger
           }
         }
-
-        requestAnimationFrame(animate);
       }
 
-      animate();
+      function handleJumpEnd() {
+        player.jumpHeld = false;
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+          e.preventDefault();
+          if (gameState === 'MENU' || (gameState === 'GAMEOVER' && !menuContainer.classList.contains('hidden'))) {
+             // Allow space to start if menu is visible, but button is safer
+          }
+          handleJumpStart();
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+          handleJumpEnd();
+        }
+      });
+
+      window.addEventListener('mousedown', handleJumpStart);
+      window.addEventListener('mouseup', handleJumpEnd);
+      window.addEventListener('touchstart', (e) => { e.preventDefault(); handleJumpStart(); }, {passive: false});
+      window.addEventListener('touchend', handleJumpEnd);
+
+      startBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent triggering jump immediately
+        startGame();
+      });
+
+      // --- Logique du Jeu ---
+      function spawnObstacle() {
+        const type = Math.random() > 0.7 ? 'air' : 'ground';
+        const w = 30 + Math.random() * 20;
+        const h = type === 'ground' ? 30 + Math.random() * 40 : 35;
+        const y = type === 'ground' 
+          ? height - groundLevel - h 
+          : height - groundLevel - 85 - Math.random() * 30; // Air obstacle
+        
+        obstacles.push({ x: width + 50, y, w, h, type });
+      }
+
+      function spawnPacket() {
+        const y = height - groundLevel - 60 - Math.random() * 80;
+        packets.push({ x: width + 50, y, radius: 8, collected: false });
+      }
+
+      function checkCollision(circle, rect) {
+        const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
+        const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
+        const dx = circle.x - closestX;
+        const dy = circle.y - closestY;
+        return (dx * dx + dy * dy) < (circle.radius * circle.radius);
+      }
+
+      function update() {
+        if (gameState !== 'PLAYING') {
+          // Update particles even in game over for explosion effect
+          updateParticles();
+          return;
+        }
+
+        frameCount++;
+        gameSpeed += 0.0015; // Accélération progressive
+        score = Math.floor(frameCount / 10);
+        scoreDisplay.textContent = score;
+
+        // Physique du joueur
+        player.vy += player.gravity;
+        
+        // Mécanique de saut variable (comme Mario/Dino)
+        if (player.jumpHeld && player.vy < 0) {
+          player.vy -= 0.3; // Boost supplémentaire si on maintient
+        }
+
+        player.y += player.vy;
+
+        // Sol
+        const floorY = height - groundLevel - player.radius;
+        if (player.y >= floorY) {
+          player.y = floorY;
+          player.vy = 0;
+          player.grounded = true;
+          player.jumpHeld = false;
+        }
+
+        // Trail
+        player.trail.push({ x: player.x, y: player.y });
+        if (player.trail.length > 15) player.trail.shift();
+
+        // Spawn
+        const minSpawnDist = 300 + Math.random() * 200 - (gameSpeed * 10);
+        const lastObs = obstacles[obstacles.length - 1];
+        if (!lastObs || (width - lastObs.x > Math.max(250, minSpawnDist))) {
+          if (Math.random() > 0.3) spawnObstacle();
+          if (Math.random() > 0.6) spawnPacket();
+        }
+
+        // Update Obstacles
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obs = obstacles[i];
+          obs.x -= gameSpeed;
+
+          // Collision
+          // On réduit légèrement la hitbox du joueur pour être plus gentil (forgiving)
+          const hitbox = { x: player.x - 4, y: player.y - 4, radius: player.radius - 4 };
+          if (checkCollision(hitbox, obs)) {
+            gameOver();
+          }
+
+          if (obs.x + obs.w < 0) obstacles.splice(i, 1);
+        }
+
+        // Update Packets
+        for (let i = packets.length - 1; i >= 0; i--) {
+          const p = packets[i];
+          p.x -= gameSpeed;
+
+          const dx = player.x - p.x;
+          const dy = player.y - p.y;
+          if (Math.sqrt(dx*dx + dy*dy) < player.radius + p.radius) {
+            score += 50;
+            scoreDisplay.textContent = score;
+            // Particules de collecte
+            for (let j = 0; j < 10; j++) {
+              particles.push({
+                x: p.x, y: p.y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                life: 0.8,
+                color: '#3fb950',
+                size: 3
+              });
+            }
+            packets.splice(i, 1);
+            continue;
+          }
+
+          if (p.x + p.radius < 0) packets.splice(i, 1);
+        }
+
+        updateParticles();
+        gridOffset = (gridOffset + gameSpeed) % 60;
+      }
+
+      function updateParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.1; // gravité légère
+          p.life -= 0.02;
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+      }
+
+      // --- Rendu ---
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Grille d'arrière-plan (Loss Landscape)
+        ctx.strokeStyle = 'rgba(48, 54, 61, 0.3)';
+        ctx.lineWidth = 1;
+        
+        // Lignes verticales mobiles
+        for (let x = -gridOffset; x < width; x += 60) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+        // Lignes horizontales fixes (perspective légère)
+        for (let y = height - groundLevel; y < height; y += 20) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+
+        // 2. Sol
+        ctx.fillStyle = '#161b22';
+        ctx.fillRect(0, height - groundLevel, width, groundLevel);
+        ctx.strokeStyle = '#30363d';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, height - groundLevel);
+        ctx.lineTo(width, height - groundLevel);
+        ctx.stroke();
+
+        // 3. Obstacles
+        obstacles.forEach(obs => {
+          ctx.fillStyle = 'rgba(248, 81, 73, 0.15)';
+          ctx.strokeStyle = '#f85149';
+          ctx.lineWidth = 2;
+          
+          if (obs.type === 'ground') {
+            // Forme de pic ou bloc
+            ctx.beginPath();
+            ctx.moveTo(obs.x, obs.y + obs.h);
+            ctx.lineTo(obs.x + obs.w / 2, obs.y);
+            ctx.lineTo(obs.x + obs.w, obs.y + obs.h);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            // Bloc flottant (Overfitting)
+            ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+            ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+            // Détail "X"
+            ctx.beginPath();
+            ctx.moveTo(obs.x + 4, obs.y + 4);
+            ctx.lineTo(obs.x + obs.w - 4, obs.y + obs.h - 4);
+            ctx.moveTo(obs.x + obs.w - 4, obs.y + 4);
+            ctx.lineTo(obs.x + 4, obs.y + obs.h - 4);
+            ctx.stroke();
+          }
+        });
+
+        // 4. Packets de données
+        packets.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#3fb950';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#3fb950';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          
+          // Anneau autour
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius + 4 + Math.sin(frameCount * 0.1) * 2, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(63, 185, 80, 0.4)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+
+        // 5. Joueur (Trail + Corps)
+        if (gameState !== 'GAMEOVER' || particles.length > 0) {
+          // Trail
+          if (player.trail.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(player.trail[0].x, player.trail[0].y);
+            for (let i = 1; i < player.trail.length; i++) {
+              ctx.lineTo(player.trail[i].x, player.trail[i].y);
+            }
+            ctx.strokeStyle = 'rgba(88, 166, 255, 0.3)';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+          }
+
+          // Corps
+          ctx.beginPath();
+          ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = '#58a6ff';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+
+        // 6. Particules
+        particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.life;
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        });
+      }
+
+      function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      // Démarrage
+      loop();
+
+      // Gestion de la visibilité pour économiser la batterie
+      document.addEventListener('visibilitychange', () => {
+        // Le requestAnimationFrame se met en pause automatiquement dans la plupart des navigateurs 
+        // quand l'onglet est caché, mais on peut s'assurer que la physique ne saute pas
+      });
     </script>
 </body>
 </html>
+
