@@ -13,7 +13,8 @@ import {
   RevealFx,
   SpacingToken,
 } from "@once-ui-system/core";
-import { Footer, Header, RouteGuard, Providers } from "@/components";
+// ✅ AJOUT DE NeuralNetworkBackground ICI
+import { Footer, Header, RouteGuard, Providers, NeuralNetworkBackground } from "@/components";
 import { baseURL, effects, fonts, style, dataStyle, home, person } from "@/resources";
 
 export async function generateMetadata() {
@@ -35,7 +36,7 @@ export default async function RootLayout({
     <Flex
       suppressHydrationWarning
       as="html"
-      lang={person.locale ?? "en"}
+      lang={person.locale ?? "fr"}
       fillWidth
       className={classNames(
         fonts.heading.variable,
@@ -52,9 +53,6 @@ export default async function RootLayout({
               (function() {
                 try {
                   const root = document.documentElement;
-                  const defaultTheme = 'system';
-                  
-                  // Set defaults from config
                   const config = ${JSON.stringify({
                     brand: style.brand,
                     accent: style.accent,
@@ -68,12 +66,10 @@ export default async function RootLayout({
                     "viz-style": dataStyle.variant,
                   })};
                   
-                  // Apply default values
                   Object.entries(config).forEach(([key, value]) => {
                     root.setAttribute('data-' + key, value);
                   });
                   
-                  // Resolve theme
                   const resolveTheme = (themeValue) => {
                     if (!themeValue || themeValue === 'system') {
                       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -81,12 +77,10 @@ export default async function RootLayout({
                     return themeValue;
                   };
                   
-                  // Apply saved theme
                   const savedTheme = localStorage.getItem('data-theme');
                   const resolvedTheme = resolveTheme(savedTheme);
                   root.setAttribute('data-theme', resolvedTheme);
                   
-                  // Apply any saved style overrides
                   const styleKeys = Object.keys(config);
                   styleKeys.forEach(key => {
                     const value = localStorage.getItem('data-' + key);
@@ -113,6 +107,9 @@ export default async function RootLayout({
           padding="0"
           horizontal="center"
         >
+          {/* ✅ CANVAS GLOBAL ICI */}
+          <NeuralNetworkBackground />
+
           <RevealFx fill position="absolute">
             <Background
               mask={{
@@ -155,13 +152,16 @@ export default async function RootLayout({
               }}
             />
           </RevealFx>
+          
           <Flex fillWidth minHeight="16" s={{ hide: true }} />
           <Header />
-          <Flex zIndex={0} fillWidth padding="l" horizontal="center" flex={1}>
+          
+          <Flex zIndex={1} fillWidth padding="l" horizontal="center" flex={1}>
             <Flex horizontal="center" fillWidth minHeight="0">
               <RouteGuard>{children}</RouteGuard>
             </Flex>
           </Flex>
+          
           <Footer />
         </Column>
       </Providers>

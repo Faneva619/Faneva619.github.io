@@ -15,6 +15,7 @@ import { home, about, person, baseURL, routes } from "@/resources";
 import { Mailchimp } from "@/components";
 import { Projects } from "@/components/work/Projects";
 import { Posts } from "@/components/blog/Posts";
+import { FediverseLinks } from "@/components/FediverseLinks"; // <--- Ampidirina eto
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -103,6 +104,12 @@ export default function Home() {
       <RevealFx translateY="16" delay={0.6}>
         <Projects range={[1, 1]} />
       </RevealFx>
+
+      {/* SECTION FEDIVERSE (QR Codes + Canvas Neural Net) */}
+      <RevealFx translateY="16" delay={0.7} fillWidth horizontal="center">
+        <FediverseLinks />
+      </RevealFx>
+
       {routes["/blog"] && (
         <Column fillWidth gap="24" marginBottom="l">
           <Row fillWidth paddingRight="64">
