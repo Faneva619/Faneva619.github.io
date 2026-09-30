@@ -28,7 +28,7 @@ export const FloatingQRCode: React.FC<FloatingQRCodeProps> = ({
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
   const qrElementRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | null>(null);
 
   // Mouvement de flottement continu
   useEffect(() => {
