@@ -8,7 +8,7 @@ const person: Person = {
   role: "Étudiant en Data Science, IA & Physique",
   avatar: "/images/faneva-avatar.jpg",
   email: "contact@rivo.int.yt", // ← Ton email Comail (quand configuré)
-  location: "Antananarivo, MDG",
+  location: "Indian/Antananarivo",
   languages: ["Malgache", "Français", "Anglais"],
   locale: "fr",
 };
