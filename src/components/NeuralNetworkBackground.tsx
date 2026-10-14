@@ -29,7 +29,7 @@ export const NeuralNetworkBackground: React.FC = () => {
           secondaryColor: qr.secondaryColor,
           bgColor: "#050505",
           dotShape: qr.dotShape,
-          cornerShape: qr.cornerShape,
+          cornerShape: "rounded-square",
           iconSvg: qr.icon,
           iconColor: qr.primaryColor,
           size: 200,
