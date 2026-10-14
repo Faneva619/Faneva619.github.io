@@ -117,15 +117,12 @@ const schema: SchemaConfig = {
 };
 
 const sameAs: SameAsConfig = {
-  linkedin: social.find((s) => s.name === "LinkedIn")?.link ?? "",
-  github: social.find((s) => s.name === "GitHub")?.link ?? "",
 };
 
 const socialSharing: SocialSharingConfig = {
   display: true,
   platforms: {
     x: false,
-    linkedin: true,
     facebook: false,
     pinterest: false,
     whatsapp: true,
