@@ -128,6 +128,7 @@ const socialSharing: SocialSharingConfig = {
     x: false,
     facebook: false,
     pinterest: false,
+    linkedin: false,
     whatsapp: true,
     reddit: false,
     telegram: false,
