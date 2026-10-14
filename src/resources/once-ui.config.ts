@@ -117,7 +117,6 @@ const schema: SchemaConfig = {
 };
 
 const sameAs: SameAsConfig = {
-  mastodon: social.find((s) => s.name.includes("Mastodon"))?.link ?? "",
   linkedin: social.find((s) => s.name === "LinkedIn")?.link ?? "",
   github: social.find((s) => s.name === "GitHub")?.link ?? "",
 };
