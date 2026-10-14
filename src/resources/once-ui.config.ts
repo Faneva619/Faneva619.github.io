@@ -117,6 +117,9 @@ const schema: SchemaConfig = {
 };
 
 const sameAs: SameAsConfig = {
+  threads: "",
+  linkedin: social.find((s) => s.name === "LinkedIn")?.link ?? "",
+  discord: "",
 };
 
 const socialSharing: SocialSharingConfig = {
