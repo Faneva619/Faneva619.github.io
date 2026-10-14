@@ -4,14 +4,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { generateCustomQR, ICONS } from "@/utils/CustomQREngine";
 
 const QR_NODES = [
-  { id: "ia", url: "https://infosec.exchange/@faneva_rivotiana", label: "IA", primaryColor: "#1e3a8a", secondaryColor: "#67e8f9", icon: ICONS.ia, dotShape: "circle" as const, cornerShape: "concentric" as const },
+  { id: "ia", url: "https://infosec.exchange/@faneva_rivotiana", label: "IA", primaryColor: "#1e3a8a", secondaryColor: "#67e8f9", icon: ICONS.ia, dotShape: "circle" as const, cornerShape: "rounded-square" as const },
   { id: "physique", url: "https://social.sciences.re/@faneva_rivotiana", label: "Physique", primaryColor: "#06b6d4", secondaryColor: "#f0f9ff", icon: ICONS.physique, dotShape: "rounded-square" as const, cornerShape: "circle" as const },
   { id: "bluesky", url: "https://bsky.app/profile/rivo.int.yt", label: "Bluesky", primaryColor: "#0085ff", secondaryColor: "#bae6fd", icon: ICONS.bluesky, dotShape: "diamond" as const, cornerShape: "rounded-square" as const },
   { id: "mastodon", url: "https://mastodon.social/@faneva_rivotiana", label: "Mastodon", primaryColor: "#6366f1", secondaryColor: "#c7d2fe", icon: ICONS.mastodon, dotShape: "circle" as const, cornerShape: "rounded-square" as const },
   { id: "ia-2", url: "https://infosec.exchange/@faneva_rivotiana", label: "IA", primaryColor: "#1e3a8a", secondaryColor: "#3b82f6", icon: ICONS.ia, dotShape: "square" as const, cornerShape: "square" as const },
-  { id: "physique-2", url: "https://social.sciences.re/@faneva_rivotiana", label: "Physique", primaryColor: "#06b6d4", secondaryColor: "#22d3ee", icon: ICONS.physique, dotShape: "circle" as const, cornerShape: "concentric" as const },
+  { id: "physique-2", url: "https://social.sciences.re/@faneva_rivotiana", label: "Physique", primaryColor: "#06b6d4", secondaryColor: "#22d3ee", icon: ICONS.physique, dotShape: "circle" as const, cornerShape: "rounded-square" as const },
   { id: "bluesky-2", url: "https://bsky.app/profile/rivo.int.yt", label: "Bluesky", primaryColor: "#0085ff", secondaryColor: "#38bdf8", icon: ICONS.bluesky, dotShape: "rounded-square" as const, cornerShape: "circle" as const },
-  { id: "mastodon-2", url: "https://mastodon.social/@faneva_rivotiana", label: "Mastodon", primaryColor: "#6366f1", secondaryColor: "#818cf8", icon: ICONS.mastodon, dotShape: "diamond" as const, cornerShape: "concentric" as const },
+  { id: "mastodon-2", url: "https://mastodon.social/@faneva_rivotiana", label: "Mastodon", primaryColor: "#6366f1", secondaryColor: "#818cf8", icon: ICONS.mastodon, dotShape: "diamond" as const, cornerShape: "rounded-square" as const },
 ];
 
 export const NeuralNetworkBackground: React.FC = () => {
